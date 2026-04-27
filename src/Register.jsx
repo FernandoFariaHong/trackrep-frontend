@@ -23,18 +23,17 @@ function Register() {
       await axios.post("http://localhost:3000/register", {
         nome,
         email,
-        senha
+        senha,
       });
 
       const loginResponse = await axios.post("http://localhost:3000/login", {
         email,
-        senha
+        senha,
       });
 
       localStorage.setItem("token", loginResponse.data.token);
 
       alert("Conta criada com sucesso!");
-
       navigate("/treinos");
     } catch (error) {
       alert(error.response?.data?.erro || "Erro ao criar conta");
@@ -42,91 +41,68 @@ function Register() {
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Criar Conta - TrackRep</h1>
+    <div className="container">
+      <div className="card">
+        <h1>Criar Conta - TrackRep</h1>
+        <p>Crie sua conta para acompanhar seus treinos e sua evolução.</p>
 
-      <form onSubmit={handleRegister}>
-        <input
-          type="text"
-          placeholder="Nome"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-        />
-
-        <br /><br />
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <br /><br />
-
-        <input
-          type="password"
-          placeholder="Senha"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-        />
-
-        <br /><br />
-
-        <label>
+        <form onSubmit={handleRegister}>
           <input
-            type="checkbox"
-            checked={aceitouTermos}
-            onChange={(e) => setAceitouTermos(e.target.checked)}
+            type="text"
+            placeholder="Nome"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            required
           />
-          {" "}
-          Declaro que li e aceito os Termos de Uso e a Política de Privacidade.{" "}
-          <span
-            onClick={() => setMostrarTermos(true)}
-            style={{
-              textDecoration: "underline",
-              color: "blue",
-              cursor: "pointer"
-            }}
+
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+
+          <input
+            type="password"
+            placeholder="Senha"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            required
+          />
+
+          <div className="terms">
+            <input
+              type="checkbox"
+              checked={aceitouTermos}
+              onChange={(e) => setAceitouTermos(e.target.checked)}
+            />
+
+            <label>
+              Declaro que li e aceito os Termos de Uso e a Política de
+              Privacidade.{" "}
+              <span onClick={() => setMostrarTermos(true)}>
+                Termos de Uso
+              </span>
+              .
+            </label>
+          </div>
+
+          <button type="submit">Criar conta</button>
+
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={() => navigate("/")}
           >
-            Termos de Uso
-          </span>
-          .
-        </label>
-
-        <br /><br />
-
-        <button type="submit">Criar conta</button>
-
-        <br /><br />
-
-        <button type="button" onClick={() => navigate("/")}>
-          Já tenho conta
-        </button>
-      </form>
+            Já tenho conta
+          </button>
+        </form>
+      </div>
 
       {mostrarTermos && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              padding: 20,
-              width: "400px",
-              borderRadius: "8px"
-            }}
-          >
+        <div className="modal-overlay">
+          <div className="modal-content">
             <h2>Termos de Uso - TrackRep</h2>
 
             <p>
@@ -136,8 +112,8 @@ function Register() {
 
             <p>
               Os dados informados serão utilizados apenas para funcionamento do
-              sistema, incluindo autenticação, registro de treinos e acompanhamento
-              da evolução de carga.
+              sistema, incluindo autenticação, registro de treinos e
+              acompanhamento da evolução de carga.
             </p>
 
             <p>
@@ -150,9 +126,7 @@ function Register() {
               conforme previsto na Lei Geral de Proteção de Dados (LGPD).
             </p>
 
-            <button onClick={() => setMostrarTermos(false)}>
-              Fechar
-            </button>
+            <button onClick={() => setMostrarTermos(false)}>Fechar</button>
           </div>
         </div>
       )}

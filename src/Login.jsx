@@ -14,50 +14,51 @@ function Login() {
     try {
       const response = await axios.post("http://localhost:3000/login", {
         email,
-        senha
+        senha,
       });
 
       localStorage.setItem("token", response.data.token);
 
-      alert("Login realizado com sucesso");
-
       navigate("/treinos");
     } catch (error) {
-      alert(error.response?.data?.erro || "Erro no login");
+      alert("Erro no login");
     }
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Login - TrackRep</h1>
+    <div className="container">
+      <div className="card">
+        <h1>Login - TrackRep</h1>
+        <p>Entre na sua conta para acompanhar seus treinos.</p>
 
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <form onSubmit={handleLogin}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-        <br /><br />
+          <input
+            type="password"
+            placeholder="Senha"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            required
+          />
 
-        <input
-          type="password"
-          placeholder="Senha"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-        />
+          <button type="submit">Entrar</button>
 
-        <br /><br />
-
-        <button type="submit">Entrar</button>
-
-        <br /><br />
-
-        <button type="button" onClick={() => navigate("/register")}>
-          Criar conta
-        </button>
-      </form>
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={() => navigate("/register")}
+          >
+            Criar conta
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
