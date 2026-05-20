@@ -1,33 +1,56 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 function Register() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
+
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
+
   const [aceitouTermos, setAceitouTermos] = useState(false);
-  const [mostrarTermos, setMostrarTermos] = useState(false);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const termosAceitos = localStorage.getItem("termosAceitos");
+
+    if (termosAceitos === "true") {
+      setAceitouTermos(true);
+      localStorage.removeItem("termosAceitos");
+    }
+  }, []);
 
   const handleRegister = async (e) => {
     e.preventDefault();
 
+    const emailFormatado = email.trim().toLowerCase();
+
+    if (senha !== confirmarSenha) {
+      alert("As senhas não coincidem.");
+      return;
+    }
+
     if (!aceitouTermos) {
-      alert("Você precisa aceitar os Termos de Uso e Política de Privacidade para criar a conta.");
+      alert(
+        "Você precisa aceitar os Termos de Uso e Política de Privacidade para criar a conta."
+      );
       return;
     }
 
     try {
       await axios.post("http://localhost:3000/register", {
         nome,
-        email,
+        email: emailFormatado,
         senha,
       });
 
       const loginResponse = await axios.post("http://localhost:3000/login", {
-        email,
+        email: emailFormatado,
         senha,
       });
 
@@ -44,6 +67,7 @@ function Register() {
     <div className="container">
       <div className="card">
         <h1>Criar Conta - TrackRep</h1>
+
         <p>Crie sua conta para acompanhar seus treinos e sua evolução.</p>
 
         <form onSubmit={handleRegister}>
@@ -63,13 +87,43 @@ function Register() {
             required
           />
 
-          <input
-            type="password"
-            placeholder="Senha"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            required
-          />
+          <div className="password-field">
+            <input
+              type={mostrarSenha ? "text" : "password"}
+              placeholder="Senha"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              required
+            />
+
+            <button
+              type="button"
+              className="eye-button"
+              onClick={() => setMostrarSenha(!mostrarSenha)}
+            >
+              {mostrarSenha ? <FiEye /> : <FiEyeOff />}
+            </button>
+          </div>
+
+          <div className="password-field">
+            <input
+              type={mostrarConfirmarSenha ? "text" : "password"}
+              placeholder="Confirmar senha"
+              value={confirmarSenha}
+              onChange={(e) => setConfirmarSenha(e.target.value)}
+              required
+            />
+
+            <button
+              type="button"
+              className="eye-button"
+              onClick={() =>
+                setMostrarConfirmarSenha(!mostrarConfirmarSenha)
+              }
+            >
+              {mostrarConfirmarSenha ? <FiEye /> : <FiEyeOff />}
+            </button>
+          </div>
 
           <div className="terms">
             <input
@@ -81,10 +135,7 @@ function Register() {
             <label>
               Declaro que li e aceito os Termos de Uso e a Política de
               Privacidade.{" "}
-              <span onClick={() => setMostrarTermos(true)}>
-                Termos de Uso
-              </span>
-              .
+              <span onClick={() => navigate("/termos")}>Termos de Uso</span>.
             </label>
           </div>
 
@@ -99,37 +150,6 @@ function Register() {
           </button>
         </form>
       </div>
-
-      {mostrarTermos && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>Termos de Uso - TrackRep</h2>
-
-            <p>
-              Ao utilizar o TrackRep, o usuário concorda em fornecer informações
-              verdadeiras para criação da conta e registro dos treinos.
-            </p>
-
-            <p>
-              Os dados informados serão utilizados apenas para funcionamento do
-              sistema, incluindo autenticação, registro de treinos e
-              acompanhamento da evolução de carga.
-            </p>
-
-            <p>
-              As senhas são armazenadas de forma criptografada, e o acesso às
-              funcionalidades protegidas é realizado por meio de autenticação.
-            </p>
-
-            <p>
-              O usuário poderá solicitar a exclusão ou alteração de seus dados,
-              conforme previsto na Lei Geral de Proteção de Dados (LGPD).
-            </p>
-
-            <button onClick={() => setMostrarTermos(false)}>Fechar</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

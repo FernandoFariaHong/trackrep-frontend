@@ -6,6 +6,21 @@ function Treinos() {
   const [treinos, setTreinos] = useState([]);
   const [paginaAtiva, setPaginaAtiva] = useState("inicio");
   const [mostrarLogout, setMostrarLogout] = useState(false);
+  const [menuUsuarioAberto, setMenuUsuarioAberto] = useState(false);
+
+  const emailUsuario = localStorage.getItem("email") || "E-mail não encontrado";
+
+  const [dadosConta, setDadosConta] = useState(() => {
+    const dadosSalvos = localStorage.getItem("dadosConta");
+
+    return dadosSalvos
+      ? JSON.parse(dadosSalvos)
+      : {
+          medida: "",
+          altura: "",
+          peso: "",
+        };
+  });
 
   const navigate = useNavigate();
 
@@ -64,9 +79,44 @@ function Treinos() {
     }
   };
 
+  const salvarDadosConta = (event) => {
+    event.preventDefault();
+
+    localStorage.setItem("dadosConta", JSON.stringify(dadosConta));
+
+    alert("Dados salvos com sucesso!");
+  };
+
   const sairDaConta = () => {
     localStorage.removeItem("token");
     navigate("/");
+  };
+
+  const excluirConta = async () => {
+    const confirmar = window.confirm(
+      "Tem certeza que deseja excluir sua conta? Essa ação não poderá ser desfeita."
+    );
+
+    if (!confirmar) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.delete("http://localhost:3000/usuarios/minha-conta", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("email");
+      localStorage.removeItem("dadosConta");
+
+      alert("Conta excluída com sucesso.");
+      navigate("/");
+    } catch (error) {
+      alert(error.response?.data?.erro || "Erro ao excluir conta");
+    }
   };
 
   const progressaoCarga = [
@@ -117,22 +167,7 @@ function Treinos() {
           >
             Estatísticas
           </a>
-
-          <a
-            className={paginaAtiva === "perfil" ? "active" : ""}
-            onClick={() => setPaginaAtiva("perfil")}
-          >
-            Perfil
-          </a>
         </nav>
-
-        {/* BOTÃO SAIR */}
-        <button
-          className="logout-button"
-          onClick={() => setMostrarLogout(true)}
-        >
-          Sair
-        </button>
       </aside>
 
       <main className="main-content">
@@ -142,12 +177,55 @@ function Treinos() {
             <p>Foco no progresso. Cada treino conta.</p>
           </div>
 
-          <button
-            className="new-workout-button"
-            onClick={() => setPaginaAtiva("novoTreino")}
-          >
-            Novo treino +
-          </button>
+          <div className="header-actions">
+            <button
+              className="new-workout-button"
+              onClick={() => setPaginaAtiva("novoTreino")}
+            >
+              Novo treino +
+            </button>
+
+            <div className="user-menu">
+              <button
+                className="user-menu-button"
+                onClick={() => setMenuUsuarioAberto(!menuUsuarioAberto)}
+              >
+                F
+              </button>
+
+              {menuUsuarioAberto && (
+                <div className="user-dropdown">
+                  <button
+                    onClick={() => {
+                      setPaginaAtiva("estatisticas");
+                      setMenuUsuarioAberto(false);
+                    }}
+                  >
+                    Estatísticas
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setPaginaAtiva("perfil");
+                      setMenuUsuarioAberto(false);
+                    }}
+                  >
+                    Dados da conta
+                  </button>
+
+                  <button
+                    className="dropdown-logout"
+                    onClick={() => {
+                      setMostrarLogout(true);
+                      setMenuUsuarioAberto(false);
+                    }}
+                  >
+                    Sair
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </header>
 
         {/* INÍCIO */}
@@ -228,6 +306,79 @@ function Treinos() {
           <section>
             <h2>Todos os treinos</h2>
             <ListaTreinos treinos={treinos} />
+          </section>
+        )}
+
+        {/* ESTATÍSTICAS */}
+        {paginaAtiva === "estatisticas" && (
+          <section className="chart-card">
+            <h2>Estatísticas</h2>
+            <p>Área de estatísticas do usuário.</p>
+          </section>
+        )}
+
+        {/* DADOS DA CONTA */}
+        {paginaAtiva === "perfil" && (
+          <section className="chart-card account-card">
+            <h2>Dados da conta</h2>
+
+            <div className="account-email-box">
+              <span>E-mail cadastrado</span>
+              <strong>{emailUsuario}</strong>
+            </div>
+
+            <form className="account-form" onSubmit={salvarDadosConta}>
+              <label>
+                Medida
+                <input
+                  type="text"
+                  placeholder="Ex: 38 cm de braço"
+                  value={dadosConta.medida}
+                  onChange={(e) =>
+                    setDadosConta({ ...dadosConta, medida: e.target.value })
+                  }
+                />
+              </label>
+
+              <label>
+                Altura
+                <input
+                  type="text"
+                  placeholder="Ex: 1,78 m"
+                  value={dadosConta.altura}
+                  onChange={(e) =>
+                    setDadosConta({ ...dadosConta, altura: e.target.value })
+                  }
+                />
+              </label>
+
+              <label>
+                Peso
+                <input
+                  type="text"
+                  placeholder="Ex: 82 kg"
+                  value={dadosConta.peso}
+                  onChange={(e) =>
+                    setDadosConta({ ...dadosConta, peso: e.target.value })
+                  }
+                />
+              </label>
+
+              <button type="submit">Salvar dados</button>
+            </form>
+
+            <div className="delete-account-area">
+              <h3>Excluir conta</h3>
+
+              <p>
+                Ao excluir sua conta, seu cadastro será removido permanentemente
+                do sistema. Essa ação não poderá ser desfeita.
+              </p>
+
+              <button className="delete-account-button" onClick={excluirConta}>
+                Excluir minha conta
+              </button>
+            </div>
           </section>
         )}
 
