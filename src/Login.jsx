@@ -22,7 +22,8 @@ function Login() {
       });
 
       localStorage.setItem("token", response.data.token);
-      localStorage.setItem("email", emailFormatado);
+      localStorage.setItem("email", response.data.usuario.email);
+      localStorage.setItem("nome", response.data.usuario.nome);
 
       navigate("/treinos");
     } catch (error) {

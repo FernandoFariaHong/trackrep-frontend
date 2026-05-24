@@ -8,7 +8,23 @@ function Treinos() {
   const [mostrarLogout, setMostrarLogout] = useState(false);
   const [menuUsuarioAberto, setMenuUsuarioAberto] = useState(false);
 
+  const [buscaExercicio, setBuscaExercicio] = useState("");
+  const [exerciciosApi, setExerciciosApi] = useState([]);
+  const [carregandoApi, setCarregandoApi] = useState(false);
+
+  const [exercicioSelecionado, setExercicioSelecionado] = useState(null);
+
   const emailUsuario = localStorage.getItem("email") || "E-mail não encontrado";
+  const nomeUsuario = localStorage.getItem("nome") || "Usuário";
+
+  const horaAtual = new Date().getHours();
+
+  const saudacao =
+    horaAtual >= 5 && horaAtual < 12
+      ? "Bom dia"
+      : horaAtual >= 12 && horaAtual < 18
+      ? "Boa tarde"
+      : "Boa noite";
 
   const [dadosConta, setDadosConta] = useState(() => {
     const dadosSalvos = localStorage.getItem("dadosConta");
@@ -57,7 +73,12 @@ function Treinos() {
     try {
       const token = localStorage.getItem("token");
 
-      await axios.post("http://localhost:3000/treinos", novoTreino, {
+      const treinoComData = {
+        ...novoTreino,
+        data: new Date().toISOString().split("T")[0],
+      };
+
+      await axios.post("http://localhost:3000/treinos", treinoComData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -79,16 +100,69 @@ function Treinos() {
     }
   };
 
+  const excluirTreino = async (id) => {
+    const confirmar = window.confirm(
+      "Tem certeza que deseja excluir este treino?"
+    );
+
+    if (!confirmar) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.delete(`http://localhost:3000/treinos/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setTreinos(treinos.filter((treino) => treino.id !== id));
+
+      alert("Treino excluído com sucesso!");
+    } catch (error) {
+      alert("Erro ao excluir treino");
+    }
+  };
+
+  const buscarExerciciosApi = async () => {
+    if (!buscaExercicio.trim()) {
+      alert("Digite o nome de um exercício");
+      return;
+    }
+
+    try {
+  setCarregandoApi(true);
+  setExerciciosApi([]);
+
+      const token = localStorage.getItem("token");
+
+      const response = await axios.get(
+        `http://localhost:3000/api/exercicios?busca=${encodeURIComponent(buscaExercicio)}&t=${Date.now()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Resposta da API:", response.data);
+      setExerciciosApi(response.data.resultados || []);
+    } catch (error) {
+      alert("Erro ao consultar API externa");
+    } finally {
+      setCarregandoApi(false);
+    }
+  };
+
   const salvarDadosConta = (event) => {
     event.preventDefault();
-
     localStorage.setItem("dadosConta", JSON.stringify(dadosConta));
-
     alert("Dados salvos com sucesso!");
   };
 
   const sairDaConta = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("nome");
+    localStorage.removeItem("email");
     navigate("/");
   };
 
@@ -109,6 +183,7 @@ function Treinos() {
       });
 
       localStorage.removeItem("token");
+      localStorage.removeItem("nome");
       localStorage.removeItem("email");
       localStorage.removeItem("dadosConta");
 
@@ -119,19 +194,82 @@ function Treinos() {
     }
   };
 
-  const progressaoCarga = [
-    { mes: "Jan", carga: 4200 },
-    { mes: "Fev", carga: 5100 },
-    { mes: "Mar", carga: 6200 },
-    { mes: "Abr", carga: 7450 },
-    { mes: "Mai", carga: 8600 },
-    { mes: "Jun", carga: 9800 },
-  ];
+  const hoje = new Date();
+
+  const inicioSemana = new Date(hoje);
+  inicioSemana.setDate(hoje.getDate() - hoje.getDay());
+
+  const treinosEstaSemana = treinos.filter((treino) => {
+    if (!treino.data_treino) return false;
+
+    const dataTreino = new Date(treino.data_treino);
+    return dataTreino >= inicioSemana && dataTreino <= hoje;
+  }).length;
+
+  const volumeTotal = treinos.reduce((total, treino) => {
+    const carga = Number(treino.carga) || 0;
+    const repeticoes = Number(treino.repeticoes) || 0;
+    const series = Number(treino.series) || 0;
+
+    return total + carga * repeticoes * series;
+  }, 0);
+
+  const minutosTotais = treinos.length * 45;
+  const horas = Math.floor(minutosTotais / 60);
+  const minutos = minutosTotais % 60;
+
+  const datasTreino = [
+    ...new Set(
+      treinos
+        .filter((treino) => treino.data_treino)
+        .map((treino) => treino.data_treino.split("T")[0])
+    ),
+  ].sort((a, b) => new Date(b) - new Date(a));
+
+  let sequencia = 0;
+  let dataAtual = new Date();
+
+  for (let i = 0; i < datasTreino.length; i++) {
+    const dataFormatada = dataAtual.toISOString().split("T")[0];
+
+    if (datasTreino.includes(dataFormatada)) {
+      sequencia++;
+      dataAtual.setDate(dataAtual.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+
+  const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"];
+
+  const progressaoCarga = meses.map((mes, index) => {
+    const cargaMes = treinos
+      .filter((treino) => {
+        if (!treino.data_treino) return false;
+
+        const dataTreino = new Date(treino.data_treino);
+        return dataTreino.getMonth() === index;
+      })
+      .reduce((total, treino) => {
+        const carga = Number(treino.carga) || 0;
+        const repeticoes = Number(treino.repeticoes) || 0;
+        const series = Number(treino.series) || 0;
+
+        return total + carga * repeticoes * series;
+      }, 0);
+
+    return {
+      mes,
+      carga: cargaMes,
+    };
+  });
+
+  const maiorCarga = Math.max(...progressaoCarga.map((item) => item.carga), 1);
 
   const pontosGrafico = progressaoCarga
     .map((item, index) => {
       const x = 40 + index * 90;
-      const y = 220 - (item.carga / 10000) * 180;
+      const y = 220 - (item.carga / maiorCarga) * 180;
       return `${x},${y}`;
     })
     .join(" ");
@@ -173,7 +311,9 @@ function Treinos() {
       <main className="main-content">
         <header className="dashboard-header">
           <div>
-            <h1>Boa noite, Fernando 💪</h1>
+            <h1>
+              {saudacao}, {nomeUsuario} 💪
+            </h1>
             <p>Foco no progresso. Cada treino conta.</p>
           </div>
 
@@ -190,7 +330,7 @@ function Treinos() {
                 className="user-menu-button"
                 onClick={() => setMenuUsuarioAberto(!menuUsuarioAberto)}
               >
-                F
+                {nomeUsuario.charAt(0).toUpperCase()}
               </button>
 
               {menuUsuarioAberto && (
@@ -228,30 +368,31 @@ function Treinos() {
           </div>
         </header>
 
-        {/* INÍCIO */}
         {paginaAtiva === "inicio" && (
           <>
             <section className="stats-grid">
               <div className="stat-card">
                 <p>Treinos esta semana</p>
                 <h2>
-                  3 <span>de 4</span>
+                  {treinosEstaSemana} <span>de 4</span>
                 </h2>
               </div>
 
               <div className="stat-card">
                 <p>Tempo total</p>
-                <h2>4h 35m</h2>
+                <h2>
+                  {horas}h {minutos}m
+                </h2>
               </div>
 
               <div className="stat-card">
                 <p>Volume total</p>
-                <h2>9.800 kg</h2>
+                <h2>{volumeTotal.toLocaleString("pt-BR")} kg</h2>
               </div>
 
               <div className="stat-card">
                 <p>Sequência</p>
-                <h2>6 dias</h2>
+                <h2>{sequencia} dias</h2>
               </div>
             </section>
 
@@ -280,7 +421,7 @@ function Treinos() {
 
                 {progressaoCarga.map((item, index) => {
                   const x = 40 + index * 90;
-                  const y = 220 - (item.carga / 10000) * 180;
+                  const y = 220 - (item.carga / maiorCarga) * 180;
 
                   return (
                     <g key={item.mes}>
@@ -296,28 +437,86 @@ function Treinos() {
 
             <section>
               <h2>Treinos recentes</h2>
-              <ListaTreinos treinos={treinos} />
+              <ListaTreinos
+                treinos={treinos}
+                excluirTreino={excluirTreino}
+              />
             </section>
           </>
         )}
 
-        {/* TREINOS */}
         {paginaAtiva === "treinos" && (
           <section>
             <h2>Todos os treinos</h2>
-            <ListaTreinos treinos={treinos} />
+            <ListaTreinos
+              treinos={treinos}
+              excluirTreino={excluirTreino}
+            />
           </section>
         )}
 
-        {/* ESTATÍSTICAS */}
         {paginaAtiva === "estatisticas" && (
-          <section className="chart-card">
-            <h2>Estatísticas</h2>
-            <p>Área de estatísticas do usuário.</p>
-          </section>
+          <>
+            <section className="chart-card">
+              <h2>Estatísticas</h2>
+              <p>Total de treinos: {treinos.length}</p>
+              <p>Treinos esta semana: {treinosEstaSemana}</p>
+              <p>Volume total: {volumeTotal.toLocaleString("pt-BR")} kg</p>
+              <p>
+                Tempo estimado: {horas}h {minutos}m
+              </p>
+            </section>
+
+            <section className="chart-card external-api-card">
+              <h2>Pesquisar exercícios</h2>
+              <p>
+                Integração com API externa para buscar informações sobre
+                exercícios.
+              </p>
+
+              <div className="api-search-box">
+                <input
+                  type="text"
+                  placeholder="Ex: squat, bench, curl"
+                  value={buscaExercicio}
+                  onChange={(e) => setBuscaExercicio(e.target.value)}
+                />
+
+                <button type="button" onClick={buscarExerciciosApi}>
+  {carregandoApi ? "Buscando..." : "Buscar"}
+</button>
+              </div>
+
+              <div className="api-results">
+                {exerciciosApi.length === 0 ? (
+                  <p>Nenhum exercício buscado ainda.</p>
+                ) : (
+                  exerciciosApi.map((exercicio) => (
+                    <div className="api-result-card" key={exercicio.id}>
+                      <h3>{exercicio.nome}</h3>
+
+                      <p>
+                        <strong>Categoria:</strong> {exercicio.categoria}
+                      </p>
+
+                      <p>
+                        <strong>Músculos:</strong> {exercicio.musculos}
+                      </p>
+
+                      <button
+  type="button"
+  onClick={() => setExercicioSelecionado(exercicio)}
+>
+  Ver detalhes
+</button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+          </>
         )}
 
-        {/* DADOS DA CONTA */}
         {paginaAtiva === "perfil" && (
           <section className="chart-card account-card">
             <h2>Dados da conta</h2>
@@ -382,7 +581,6 @@ function Treinos() {
           </section>
         )}
 
-        {/* NOVO TREINO */}
         {paginaAtiva === "novoTreino" && (
           <section className="chart-card">
             <h2>Novo treino</h2>
@@ -433,7 +631,48 @@ function Treinos() {
         )}
       </main>
 
-      {/* MODAL SAIR */}
+              {exercicioSelecionado && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>{exercicioSelecionado.nome}</h2>
+
+            {exercicioSelecionado.imagem ? (
+              <img
+                src={exercicioSelecionado.imagem}
+                alt={exercicioSelecionado.nome}
+                style={{
+                  width: "100%",
+                  maxHeight: "300px",
+                  objectFit: "contain",
+                  marginBottom: "15px",
+                  borderRadius: "10px",
+                  background: "#fff",
+                }}
+              />
+            ) : (
+              <p>Imagem não disponível.</p>
+            )}
+
+            <p>
+              <strong>Categoria:</strong>{" "}
+              {exercicioSelecionado.categoria}
+            </p>
+
+            <p>
+              <strong>Músculos:</strong>{" "}
+              {exercicioSelecionado.musculos}
+            </p>
+
+            <p>{exercicioSelecionado.descricao}</p>
+
+            <button
+              onClick={() => setExercicioSelecionado(null)}
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
       {mostrarLogout && (
         <div className="modal-overlay">
           <div className="modal-content logout-modal">
@@ -457,8 +696,7 @@ function Treinos() {
   );
 }
 
-/* LISTA */
-function ListaTreinos({ treinos }) {
+function ListaTreinos({ treinos, excluirTreino }) {
   return (
     <div className="recent-list">
       {treinos.length === 0 ? (
@@ -466,10 +704,37 @@ function ListaTreinos({ treinos }) {
       ) : (
         treinos.map((t) => (
           <div className="recent-card" key={t.id}>
-            <strong>{t.exercicio}</strong>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              <strong>{t.exercicio}</strong>
+
+              <button
+                type="button"
+                onClick={() => excluirTreino(t.id)}
+                style={{
+                  width: "auto",
+                  background: "#dc2626",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "6px 10px",
+                  cursor: "pointer",
+                }}
+              >
+                Excluir
+              </button>
+            </div>
+
             <span>
               {t.series} séries • {t.repeticoes} reps
             </span>
+
             <span>{t.carga} kg</span>
           </div>
         ))
