@@ -74,7 +74,6 @@ input:focus {
 
 /* BOTÕES */
 button {
-  width: 100%;
   padding: 10px;
   border-radius: 8px;
   border: none;
@@ -786,10 +785,8 @@ button:hover {
   min-height: 100vh;
 
   background:
-    linear-gradient(
-      rgba(0, 0, 0, 0.30),
-      rgba(0, 0, 0, 0.30)
-    ),
+    linear-gradient(rgba(0, 0, 0, 0.30),
+      rgba(0, 0, 0, 0.30)),
     url("/trackrepimg.jpg");
 
   background-size: 75%;

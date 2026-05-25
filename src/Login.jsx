@@ -25,7 +25,7 @@ function Login() {
       localStorage.setItem("email", response.data.usuario.email);
       localStorage.setItem("nome", response.data.usuario.nome);
 
-      navigate("/treinos");
+      navigate("/home");
     } catch (error) {
       alert(error.response?.data?.erro || "Erro no login");
     }

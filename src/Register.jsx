@@ -55,9 +55,11 @@ function Register() {
       });
 
       localStorage.setItem("token", loginResponse.data.token);
+      localStorage.setItem("email", loginResponse.data.usuario.email);
+      localStorage.setItem("nome", loginResponse.data.usuario.nome);
 
       alert("Conta criada com sucesso!");
-      navigate("/treinos");
+      navigate("/home");
     } catch (error) {
       alert(error.response?.data?.erro || "Erro ao criar conta");
     }
