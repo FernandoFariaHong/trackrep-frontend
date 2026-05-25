@@ -16,6 +16,13 @@ body {
 
 .container {
   min-height: 100vh;
+
+  background-image: url("/trackrepimg.jpg");
+  background-size: 70%;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-color: #000;
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -23,18 +30,16 @@ body {
 
 .card {
   width: 100%;
-  max-width: 360px;
-  padding: 26px;
-  border-radius: 16px;
+  max-width: 380px;
 
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(10px);
+  padding: 32px;
+  border-radius: 20px;
 
-  border: 1px solid rgba(59, 130, 246, 0.15);
+  background: rgba(0, 0, 0, 0.20);
 
-  box-shadow:
-    0 0 30px rgba(59, 130, 246, 0.08),
-    0 15px 40px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
 }
 
 .card h1 {
@@ -50,16 +55,15 @@ body {
 /* INPUT */
 input {
   width: 100%;
-  padding: 9px;
-  margin-bottom: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+
+  background: rgba(0, 0, 0, 0.25);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
 
   border-radius: 8px;
-  border: 1px solid #1e293b;
-
-  background: #020617;
-  color: #f8fafc;
-
-  font-size: 13px;
+  color: white;
 }
 
 input:focus {
@@ -775,5 +779,120 @@ button:hover {
 
   .api-search-box button {
     width: 100%;
+  }
+}
+
+.home-container {
+  min-height: 100vh;
+
+  background:
+    linear-gradient(
+      rgba(0, 0, 0, 0.30),
+      rgba(0, 0, 0, 0.30)
+    ),
+    url("/trackrepimg.jpg");
+
+  background-size: 75%;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-color: #000;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+  padding: 20px;
+}
+
+.home-card {
+  max-width: 700px;
+  width: 100%;
+
+  animation: fadeUp 1.2s ease-out;
+}
+
+.home-logo {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #0f172a;
+  border-radius: 50%;
+
+  font-size: 32px;
+  font-weight: 800;
+  color: white;
+}
+
+.home-title {
+  font-size: 90px;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.track {
+  color: white;
+}
+
+.rep {
+  color: #3b82f6;
+}
+
+.home-subtitle {
+  font-size: 28px;
+  color: #b8c2d6;
+  margin-bottom: 50px;
+  line-height: 1.5;
+}
+
+.home-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.home-btn {
+  min-width: 240px;
+  padding: 18px 32px;
+
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+
+  border: 2px solid #3b82f6;
+  border-radius: 14px;
+
+  font-size: 1.2rem;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.home-btn:hover {
+  background: #3b82f6;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.home-btn:hover {
+  background: #3b82f6;
+  color: white;
+  transform: translateY(-2px);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

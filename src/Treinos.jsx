@@ -40,16 +40,23 @@ function Treinos() {
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    navigate("/login");
+    return;
+  }
+
+  buscarTreinos();
+}, [navigate]);
+
   const [novoTreino, setNovoTreino] = useState({
     exercicio: "",
     carga: "",
     repeticoes: "",
     series: "",
   });
-
-  useEffect(() => {
-    buscarTreinos();
-  }, []);
 
   const buscarTreinos = async () => {
     try {

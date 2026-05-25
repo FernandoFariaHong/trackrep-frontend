@@ -1,18 +1,55 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./Login";
 import Register from "./Register";
 import Treinos from "./Treinos";
 import Terms from "./Terms";
+import Home from "./Home";
+import HomeDashboard from "./HomeDashboard";
+import Stats from "./Stats";
+
+// Componente para proteger rotas
+function PrivateRoute({ children }) {
+  const token = localStorage.getItem("token");
+
+  return token ? children : <Navigate to="/login" replace />;
+}
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={<Home />} />
+
+      <Route path="/login" element={<Login />} />
 
       <Route path="/register" element={<Register />} />
 
-      <Route path="/treinos" element={<Treinos />} />
+      <Route
+        path="/home"
+        element={
+          <PrivateRoute>
+            <HomeDashboard />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/treinos"
+        element={
+          <PrivateRoute>
+            <Treinos />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/estatisticas"
+        element={
+          <PrivateRoute>
+            <Stats />
+          </PrivateRoute>
+        }
+      />
 
       <Route path="/termos" element={<Terms />} />
     </Routes>
