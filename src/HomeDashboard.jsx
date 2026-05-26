@@ -285,9 +285,10 @@ function HomeDashboard() {
                         <span>8 exercícios • ~1h 10m</span>
                     </div>
 
-                    <button onClick={() => alert("Botão Iniciar treino")}>
+                    <button onClick={() => navigate("/treinos")}>
                         Iniciar treino ▶
                     </button>
+
                 </section>
 
                 <section className="chart-card">

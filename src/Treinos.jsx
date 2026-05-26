@@ -4,15 +4,18 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 function Treinos() {
   const [treinos, setTreinos] = useState([]);
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [mostrarLogout, setMostrarLogout] = useState(false);
   const [menuUsuarioAberto, setMenuUsuarioAberto] = useState(false);
+
+  const [treinoEmAndamento, setTreinoEmAndamento] = useState(false);
+  const [mostrarModalExercicio, setMostrarModalExercicio] = useState(false);
+  const [exerciciosTreino, setExerciciosTreino] = useState([]);
+  const [nomeExercicio, setNomeExercicio] = useState("");
 
   const navigate = useNavigate();
   const location = useLocation();
 
   const nomeUsuario = localStorage.getItem("nome") || "Usuário";
-
   const horaAtual = new Date().getHours();
 
   const saudacao =
@@ -21,13 +24,6 @@ function Treinos() {
       : horaAtual >= 12 && horaAtual < 18
       ? "Boa tarde"
       : "Boa noite";
-
-  const [novoTreino, setNovoTreino] = useState({
-    exercicio: "",
-    carga: "",
-    repeticoes: "",
-    series: "",
-  });
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -44,7 +40,7 @@ function Treinos() {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await axios.get("http://localhost:3000/treinos", {
+      const response = await axios.get("http://localhost:3000/treinos/sessoes", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -56,62 +52,29 @@ function Treinos() {
     }
   };
 
-  const cadastrarTreino = async (event) => {
-    event.preventDefault();
-
-    try {
-      const token = localStorage.getItem("token");
-
-      const treinoComData = {
-        ...novoTreino,
-        data: new Date().toISOString().split("T")[0],
-      };
-
-      await axios.post("http://localhost:3000/treinos", treinoComData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setNovoTreino({
-        exercicio: "",
-        carga: "",
-        repeticoes: "",
-        series: "",
-      });
-
-      await buscarTreinos();
-      setMostrarFormulario(false);
-
-      alert("Treino cadastrado com sucesso!");
-    } catch (error) {
-      alert("Erro ao cadastrar treino");
-    }
-  };
-
   const excluirTreino = async (id) => {
-    const confirmar = window.confirm(
-      "Tem certeza que deseja excluir este treino?"
-    );
+  const confirmar = window.confirm(
+    "Tem certeza que deseja excluir este treino?"
+  );
 
-    if (!confirmar) return;
+  if (!confirmar) return;
 
-    try {
-      const token = localStorage.getItem("token");
+  try {
+    const token = localStorage.getItem("token");
 
-      await axios.delete(`http://localhost:3000/treinos/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    await axios.delete(`http://localhost:3000/treinos/sessoes/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      setTreinos(treinos.filter((treino) => treino.id !== id));
+    setTreinos(treinos.filter((treino) => treino.id !== id));
 
-      alert("Treino excluído com sucesso!");
-    } catch (error) {
-      alert("Erro ao excluir treino");
-    }
-  };
+    alert("Treino excluído com sucesso!");
+  } catch (error) {
+    alert(error.response?.data?.erro || "Erro ao excluir treino");
+  }
+};
 
   const sairDaConta = () => {
     localStorage.removeItem("token");
@@ -119,6 +82,109 @@ function Treinos() {
     localStorage.removeItem("email");
     navigate("/");
   };
+
+  const adicionarExercicio = () => {
+    if (!nomeExercicio.trim()) return;
+
+    setTreinoEmAndamento(true);
+
+    setExerciciosTreino([
+      ...exerciciosTreino,
+      {
+        nome: nomeExercicio,
+        series: [{ carga: "", reps: "" }],
+      },
+    ]);
+
+    setNomeExercicio("");
+    setMostrarModalExercicio(false);
+  };
+
+  const adicionarSerie = (exercicioIndex) => {
+    const novosExercicios = [...exerciciosTreino];
+
+    novosExercicios[exercicioIndex].series.push({
+      carga: "",
+      reps: "",
+    });
+
+    setExerciciosTreino(novosExercicios);
+  };
+
+  const atualizarSerie = (exercicioIndex, serieIndex, campo, valor) => {
+    const novosExercicios = [...exerciciosTreino];
+
+    novosExercicios[exercicioIndex].series[serieIndex][campo] = valor;
+
+    setExerciciosTreino(novosExercicios);
+  };
+
+  const excluirExercicio = (exercicioIndex) => {
+    const novosExercicios = exerciciosTreino.filter(
+      (_, index) => index !== exercicioIndex
+    );
+
+    setExerciciosTreino(novosExercicios);
+  };
+
+  const excluirSerie = (exercicioIndex, serieIndex) => {
+    const novosExercicios = [...exerciciosTreino];
+
+    novosExercicios[exercicioIndex].series = novosExercicios[
+      exercicioIndex
+    ].series.filter((_, index) => index !== serieIndex);
+
+    setExerciciosTreino(novosExercicios);
+  };
+
+  const salvarTreino = async () => {
+    if (exerciciosTreino.length === 0) {
+      alert("Adicione pelo menos um exercício antes de salvar.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.post(
+        "http://localhost:3000/treinos/sessao",
+        {
+          exercicios: exerciciosTreino,
+          data: new Date().toISOString().split("T")[0],
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert("Treino salvo com sucesso!");
+
+      setExerciciosTreino([]);
+      setTreinoEmAndamento(false);
+
+      await buscarTreinos();
+    } catch (error) {
+      alert(error.response?.data?.erro || "Erro ao salvar treino");
+    }
+  };
+
+  const totalSeries = exerciciosTreino.reduce(
+    (total, exercicio) => total + exercicio.series.length,
+    0
+  );
+
+  const volumeTotal = exerciciosTreino.reduce((total, exercicio) => {
+    const volumeExercicio = exercicio.series.reduce((subtotal, serie) => {
+      const carga = Number(serie.carga) || 0;
+      const reps = Number(serie.reps) || 0;
+
+      return subtotal + carga * reps;
+    }, 0);
+
+    return total + volumeExercicio;
+  }, 0);
 
   return (
     <div className="dashboard">
@@ -166,9 +232,9 @@ function Treinos() {
           <div className="header-actions">
             <button
               className="new-workout-button"
-              onClick={() => setMostrarFormulario(true)}
+              onClick={() => setMostrarModalExercicio(true)}
             >
-              Novo treino +
+              + Adicionar Exercício
             </button>
 
             <div className="user-menu">
@@ -214,61 +280,195 @@ function Treinos() {
           </div>
         </header>
 
-        {mostrarFormulario && (
-          <section className="chart-card">
-            <h2>Novo treino</h2>
+        {treinoEmAndamento ? (
+          <section className="chart-card training-card">
+            <h2>Treinamento</h2>
 
-            <form onSubmit={cadastrarTreino}>
-              <input
-                type="text"
-                placeholder="Exercício"
-                value={novoTreino.exercicio}
-                onChange={(e) =>
-                  setNovoTreino({ ...novoTreino, exercicio: e.target.value })
-                }
-              />
+            <div className="training-stats">
+              <div className="training-stat">
+                <p>Duração</p>
+                <h3>0s</h3>
+              </div>
 
-              <input
-                type="number"
-                placeholder="Carga"
-                value={novoTreino.carga}
-                onChange={(e) =>
-                  setNovoTreino({ ...novoTreino, carga: e.target.value })
-                }
-              />
+              <div className="training-stat">
+                <p>Volume</p>
+                <h3>{volumeTotal} kg</h3>
+              </div>
 
-              <input
-                type="number"
-                placeholder="Repetições"
-                value={novoTreino.repeticoes}
-                onChange={(e) =>
-                  setNovoTreino({
-                    ...novoTreino,
-                    repeticoes: e.target.value,
-                  })
-                }
-              />
+              <div className="training-stat">
+                <p>Séries</p>
+                <h3>{totalSeries}</h3>
+              </div>
+            </div>
 
-              <input
-                type="number"
-                placeholder="Séries"
-                value={novoTreino.series}
-                onChange={(e) =>
-                  setNovoTreino({ ...novoTreino, series: e.target.value })
-                }
-              />
+            {exerciciosTreino.map((exercicio, exercicioIndex) => (
+              <div key={exercicioIndex} className="exercise-card">
+                <h3>{exercicio.nome}</h3>
 
-              <button type="submit">Salvar treino</button>
-            </form>
+                <table className="exercise-table">
+                  <thead>
+                    <tr>
+                      <th>SÉRIE</th>
+                      <th>KG</th>
+                      <th>REPS</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {exercicio.series.map((serie, serieIndex) => (
+                      <tr key={serieIndex}>
+                        <td>{serieIndex + 1}</td>
+
+                        <td>
+                          <input
+                            type="number"
+                            value={serie.carga}
+                            onChange={(e) =>
+                              atualizarSerie(
+                                exercicioIndex,
+                                serieIndex,
+                                "carga",
+                                e.target.value
+                              )
+                            }
+                            className="series-input"
+                            placeholder="0"
+                          />
+                        </td>
+
+                        <td>
+                          <input
+                            type="number"
+                            value={serie.reps}
+                            onChange={(e) =>
+                              atualizarSerie(
+                                exercicioIndex,
+                                serieIndex,
+                                "reps",
+                                e.target.value
+                              )
+                            }
+                            className="series-input"
+                            placeholder="0"
+                          />
+                        </td>
+
+                        <td>
+                          <button
+                            type="button"
+                            className="delete-serie-button"
+                            onClick={() =>
+                              excluirSerie(exercicioIndex, serieIndex)
+                            }
+                          >
+                            X
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <button
+                  type="button"
+                  className="add-series-button"
+                  onClick={() => adicionarSerie(exercicioIndex)}
+                >
+                  + Adicionar Série
+                </button>
+
+                <button
+                  type="button"
+                  className="delete-exercise-button"
+                  onClick={() => excluirExercicio(exercicioIndex)}
+                >
+                  Excluir Exercício
+                </button>
+              </div>
+            ))}
+
+            <button
+              className="new-workout-button"
+              onClick={() => setMostrarModalExercicio(true)}
+              style={{ marginTop: "20px" }}
+            >
+              + Adicionar Exercício
+            </button>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                marginTop: "16px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={salvarTreino}
+                style={{
+                  background: "#16a34a",
+                  color: "#fff",
+                }}
+              >
+                Salvar Treino
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setExerciciosTreino([]);
+                  setTreinoEmAndamento(false);
+                }}
+                style={{
+                  background: "#dc2626",
+                  color: "#fff",
+                }}
+              >
+                Descartar Treino
+              </button>
+            </div>
+          </section>
+        ) : (
+          <section>
+            <h2>Todos os treinos</h2>
+
+            <ListaTreinos treinos={treinos} excluirTreino={excluirTreino} />
           </section>
         )}
-
-        <section>
-          <h2>Todos os treinos</h2>
-
-          <ListaTreinos treinos={treinos} excluirTreino={excluirTreino} />
-        </section>
       </main>
+
+      {mostrarModalExercicio && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Adicionar Exercício</h2>
+
+            <input
+              type="text"
+              placeholder="Nome do exercício"
+              value={nomeExercicio}
+              onChange={(e) => setNomeExercicio(e.target.value)}
+            />
+
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                marginTop: "15px",
+              }}
+            >
+              <button onClick={adicionarExercicio}>Adicionar</button>
+
+              <button
+                className="secondary-button"
+                onClick={() => setMostrarModalExercicio(false)}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {mostrarLogout && (
         <div className="modal-overlay">
@@ -305,11 +505,30 @@ function ListaTreinos({ treinos, excluirTreino }) {
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                alignItems: "center",
-                gap: "10px",
+                alignItems: "flex-start",
+                gap: "12px",
               }}
             >
-              <strong>{t.exercicio}</strong>
+              <div>
+                <strong>Treino #{t.id}</strong>
+
+                <span>
+                  {t.total_series} séries •{" "}
+                  {Number(t.volume_total).toLocaleString("pt-BR")} kg
+                </span>
+
+                <span>
+                  {new Date(t.data_treino).toLocaleDateString("pt-BR")}
+                </span>
+
+                <div style={{ marginTop: "12px" }}>
+                  {t.exercicios?.map((exercicio, index) => (
+                    <p key={index} style={{ margin: "6px 0" }}>
+                      {exercicio.total_series} sets {exercicio.nome}
+                    </p>
+                  ))}
+                </div>
+              </div>
 
               <button
                 type="button"
@@ -327,12 +546,6 @@ function ListaTreinos({ treinos, excluirTreino }) {
                 Excluir
               </button>
             </div>
-
-            <span>
-              {t.series} séries • {t.repeticoes} reps
-            </span>
-
-            <span>{t.carga} kg</span>
           </div>
         ))
       )}
