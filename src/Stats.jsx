@@ -41,14 +41,18 @@ function Stats() {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await axios.get("http://localhost:3000/treinos", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        "http://localhost:3000/treinos/sessoes",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       setTreinos(response.data);
     } catch (error) {
+      console.error(error);
       alert("Erro ao buscar treinos");
     }
   };
@@ -104,14 +108,14 @@ function Stats() {
   }).length;
 
   const volumeTotal = treinos.reduce((total, treino) => {
-    const carga = Number(treino.carga) || 0;
-    const repeticoes = Number(treino.repeticoes) || 0;
-    const series = Number(treino.series) || 0;
-
-    return total + carga * repeticoes * series;
+    return total + Number(treino.volume_total || 0);
   }, 0);
 
-  const minutosTotais = treinos.length * 45;
+  const totalSeries = treinos.reduce((total, treino) => {
+    return total + Number(treino.total_series || 0);
+  }, 0);
+
+  const minutosTotais = totalSeries * 2;
   const horas = Math.floor(minutosTotais / 60);
   const minutos = minutosTotais % 60;
 
@@ -186,13 +190,13 @@ function Stats() {
                   </button>
 
                   <button
-                    onClick={() => {
-                      alert("A tela de dados da conta será separada depois.");
-                      setMenuUsuarioAberto(false);
-                    }}
-                  >
-                    Dados da conta
-                  </button>
+  onClick={() => {
+    navigate("/home");
+    setMenuUsuarioAberto(false);
+  }}
+>
+  Dados da conta
+</button>
 
                   <button
                     className="dropdown-logout"
@@ -211,9 +215,15 @@ function Stats() {
 
         <section className="chart-card">
           <h2>Estatísticas</h2>
+
           <p>Total de treinos: {treinos.length}</p>
+
           <p>Treinos esta semana: {treinosEstaSemana}</p>
+
+          <p>Total de séries: {totalSeries}</p>
+
           <p>Volume total: {volumeTotal.toLocaleString("pt-BR")} kg</p>
+
           <p>
             Tempo estimado: {horas}h {minutos}m
           </p>
@@ -221,6 +231,7 @@ function Stats() {
 
         <section className="chart-card external-api-card">
           <h2>Pesquisar exercícios</h2>
+
           <p>
             Integração com API externa para buscar informações sobre exercícios.
           </p>
@@ -310,6 +321,7 @@ function Stats() {
         <div className="modal-overlay">
           <div className="modal-content logout-modal">
             <h2>Sair da conta?</h2>
+
             <p>Tem certeza que deseja sair?</p>
 
             <div className="logout-actions">

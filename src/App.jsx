@@ -7,6 +7,7 @@ import Terms from "./Terms";
 import Home from "./Home";
 import HomeDashboard from "./HomeDashboard";
 import Stats from "./Stats";
+import Perfil from "./Perfil";
 
 // Componente para proteger rotas
 function PrivateRoute({ children }) {
@@ -47,6 +48,15 @@ function App() {
         element={
           <PrivateRoute>
             <Stats />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/perfil"
+        element={
+          <PrivateRoute>
+            <Perfil />
           </PrivateRoute>
         }
       />

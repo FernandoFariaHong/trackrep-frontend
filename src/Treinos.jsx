@@ -11,6 +11,12 @@ function Treinos() {
   const [mostrarModalExercicio, setMostrarModalExercicio] = useState(false);
   const [exerciciosTreino, setExerciciosTreino] = useState([]);
   const [nomeExercicio, setNomeExercicio] = useState("");
+  const [dataTreino, setDataTreino] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+
+  const [tempoTreino, setTempoTreino] = useState(0);
+  const [cronometroAtivo, setCronometroAtivo] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,8 +28,8 @@ function Treinos() {
     horaAtual >= 5 && horaAtual < 12
       ? "Bom dia"
       : horaAtual >= 12 && horaAtual < 18
-      ? "Boa tarde"
-      : "Boa noite";
+        ? "Boa tarde"
+        : "Boa noite";
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -35,6 +41,18 @@ function Treinos() {
 
     buscarTreinos();
   }, [navigate]);
+
+  useEffect(() => {
+    let intervalo;
+
+    if (cronometroAtivo) {
+      intervalo = setInterval(() => {
+        setTempoTreino((tempoAnterior) => tempoAnterior + 1);
+      }, 1000);
+    }
+
+    return () => clearInterval(intervalo);
+  }, [cronometroAtivo]);
 
   const buscarTreinos = async () => {
     try {
@@ -53,28 +71,28 @@ function Treinos() {
   };
 
   const excluirTreino = async (id) => {
-  const confirmar = window.confirm(
-    "Tem certeza que deseja excluir este treino?"
-  );
+    const confirmar = window.confirm(
+      "Tem certeza que deseja excluir este treino?"
+    );
 
-  if (!confirmar) return;
+    if (!confirmar) return;
 
-  try {
-    const token = localStorage.getItem("token");
+    try {
+      const token = localStorage.getItem("token");
 
-    await axios.delete(`http://localhost:3000/treinos/sessoes/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      await axios.delete(`http://localhost:3000/treinos/sessoes/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    setTreinos(treinos.filter((treino) => treino.id !== id));
+      setTreinos(treinos.filter((treino) => treino.id !== id));
 
-    alert("Treino excluído com sucesso!");
-  } catch (error) {
-    alert(error.response?.data?.erro || "Erro ao excluir treino");
-  }
-};
+      alert("Treino excluído com sucesso!");
+    } catch (error) {
+      alert(error.response?.data?.erro || "Erro ao excluir treino");
+    }
+  };
 
   const sairDaConta = () => {
     localStorage.removeItem("token");
@@ -83,8 +101,29 @@ function Treinos() {
     navigate("/");
   };
 
+  const formatarTempo = (segundos) => {
+    const horas = Math.floor(segundos / 3600);
+    const minutos = Math.floor((segundos % 3600) / 60);
+    const segs = segundos % 60;
+
+    if (horas > 0) {
+      return `${horas}h ${minutos}m ${segs}s`;
+    }
+
+    if (minutos > 0) {
+      return `${minutos}m ${segs}s`;
+    }
+
+    return `${segs}s`;
+  };
+
   const adicionarExercicio = () => {
     if (!nomeExercicio.trim()) return;
+
+    if (!treinoEmAndamento) {
+      setTempoTreino(0);
+      setCronometroAtivo(true);
+    }
 
     setTreinoEmAndamento(true);
 
@@ -150,7 +189,7 @@ function Treinos() {
         "http://localhost:3000/treinos/sessao",
         {
           exercicios: exerciciosTreino,
-          data: new Date().toISOString().split("T")[0],
+          data: dataTreino,
         },
         {
           headers: {
@@ -163,6 +202,9 @@ function Treinos() {
 
       setExerciciosTreino([]);
       setTreinoEmAndamento(false);
+      setCronometroAtivo(false);
+      setTempoTreino(0);
+      setDataTreino(new Date().toISOString().split("T")[0]);
 
       await buscarTreinos();
     } catch (error) {
@@ -258,7 +300,7 @@ function Treinos() {
 
                   <button
                     onClick={() => {
-                      alert("A tela de dados da conta será separada depois.");
+                      navigate("/perfil");
                       setMenuUsuarioAberto(false);
                     }}
                   >
@@ -287,7 +329,7 @@ function Treinos() {
             <div className="training-stats">
               <div className="training-stat">
                 <p>Duração</p>
-                <h3>0s</h3>
+                <h3>{formatarTempo(tempoTreino)}</h3>
               </div>
 
               <div className="training-stat">
@@ -419,6 +461,9 @@ function Treinos() {
                 onClick={() => {
                   setExerciciosTreino([]);
                   setTreinoEmAndamento(false);
+                  setCronometroAtivo(false);
+                  setTempoTreino(0);
+                  setDataTreino(new Date().toISOString().split("T")[0]);
                 }}
                 style={{
                   background: "#dc2626",
@@ -448,6 +493,13 @@ function Treinos() {
               placeholder="Nome do exercício"
               value={nomeExercicio}
               onChange={(e) => setNomeExercicio(e.target.value)}
+            />
+
+            <input
+              type="date"
+              value={dataTreino}
+              onChange={(e) => setDataTreino(e.target.value)}
+              onClick={(e) => e.target.showPicker && e.target.showPicker()}
             />
 
             <div
