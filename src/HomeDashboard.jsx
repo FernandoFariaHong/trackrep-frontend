@@ -32,8 +32,8 @@ function HomeDashboard() {
     horaAtual >= 5 && horaAtual < 12
       ? "Bom dia"
       : horaAtual >= 12 && horaAtual < 18
-      ? "Boa tarde"
-      : "Boa noite";
+        ? "Boa tarde"
+        : "Boa noite";
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -183,7 +183,7 @@ function HomeDashboard() {
 
           <a
             className={location.pathname === "/treinos" ? "active" : ""}
-            onClick={() => navigate("/treinos")}
+            onClick={() => navigate("/treinos", { state: { abrirModalExercicio: true } })}
           >
             <FiActivity /> Treinos
           </a>
@@ -225,7 +225,9 @@ function HomeDashboard() {
           <div className="header-actions">
             <button
               className="new-workout-button"
-              onClick={() => navigate("/treinos")}
+              onClick={() =>
+                navigate("/treinos", { state: { abrirModalExercicio: true } })
+              }
             >
               <FiPlus /> Novo treino
             </button>
@@ -279,9 +281,7 @@ function HomeDashboard() {
               <FiCalendar />
             </div>
             <p>Treinos esta semana</p>
-            <h2>
-              {treinosEstaSemana} <span>de 4</span>
-            </h2>
+            <h2>{treinosEstaSemana}</h2>
           </div>
 
           <div className="stat-card">
@@ -311,12 +311,42 @@ function HomeDashboard() {
 
         <section className="next-workout">
           <div>
-            <p>Próximo treino</p>
-            <h2>Peito e Bíceps</h2>
-            <span>8 exercícios • Estimado 1h10min</span>
+            <p
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "1.2rem",
+    fontWeight: "600",
+  }}
+>
+  <FiActivity size={24} />
+  Continue sua evolução
+</p>
+
+            <h2>Treinos registrados: {treinos.length}</h2>
+
+            <span>
+              Último treino:{" "}
+              {ultimoTreino
+                ? new Date(ultimoTreino.data_treino).toLocaleDateString("pt-BR")
+                : "Nenhum treino ainda"}
+            </span>
+
+            <br />
+
+            <span>
+              Volume acumulado: {volumeTotal.toLocaleString("pt-BR")} kg
+            </span>
           </div>
 
-          <button onClick={() => navigate("/treinos")}>Iniciar treino ▶</button>
+          <button
+            onClick={() =>
+              navigate("/treinos", { state: { abrirModalExercicio: true } })
+            }
+          >
+            Iniciar treino ▶
+          </button>
         </section>
 
         <section className="home-content-grid">

@@ -31,29 +31,7 @@ function Login() {
       alert(error.response?.data?.erro || "Erro no login");
     }
   };
-
-  async function excluirUsuario(id, nome) {
-  const confirmar = window.confirm(
-    `Tem certeza que deseja excluir o usuário "${nome}"? Essa ação apagará todos os dados vinculados.`
-  );
-
-  if (!confirmar) return;
-
-  try {
-    const token = localStorage.getItem("token");
-
-    await axios.delete(`http://localhost:3000/admin/usuarios/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    alert("Usuário excluído com sucesso!");
-    carregarDashboard();
-  } catch (error) {
-    alert(error.response?.data?.erro || "Erro ao excluir usuário.");
-  }
-}
+  
 
   return (
     <div className="container">
