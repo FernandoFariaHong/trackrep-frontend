@@ -43,6 +43,13 @@ function Treinos() {
   }, [navigate]);
 
   useEffect(() => {
+    if (location.state?.abrirModalExercicio) {
+      setMostrarModalExercicio(true);
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, navigate, location.pathname]);
+
+  useEffect(() => {
     let intervalo;
 
     if (cronometroAtivo) {
@@ -496,11 +503,12 @@ function Treinos() {
             />
 
             <input
-              type="date"
-              value={dataTreino}
-              onChange={(e) => setDataTreino(e.target.value)}
-              onClick={(e) => e.target.showPicker && e.target.showPicker()}
-            />
+  type="date"
+  value={dataTreino}
+  max={new Date().toISOString().split("T")[0]}
+  onChange={(e) => setDataTreino(e.target.value)}
+  onClick={(e) => e.target.showPicker && e.target.showPicker()}
+/>
 
             <div
               style={{

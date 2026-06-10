@@ -11,6 +11,7 @@ import {
     FiSearch,
     FiArrowLeft,
 } from "react-icons/fi";
+ import { mascararEmail } from "./utils/mascararDados";
 
 function AdminDashboard() {
     const navigate = useNavigate();
@@ -249,7 +250,7 @@ function AdminDashboard() {
                                             </div>
                                         </td>
 
-                                        <td>{usuario.email}</td>
+                                        <td>{mascararEmail("admin@email.com")}</td>
 
                                         <td>
                                             {Number(usuario.is_admin) === 1 ? (

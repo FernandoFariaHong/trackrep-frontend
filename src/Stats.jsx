@@ -23,8 +23,8 @@ function Stats() {
     horaAtual >= 5 && horaAtual < 12
       ? "Bom dia"
       : horaAtual >= 12 && horaAtual < 18
-      ? "Boa tarde"
-      : "Boa noite";
+        ? "Boa tarde"
+        : "Boa noite";
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -190,13 +190,13 @@ function Stats() {
                   </button>
 
                   <button
-  onClick={() => {
-    navigate("/home");
-    setMenuUsuarioAberto(false);
-  }}
->
-  Dados da conta
-</button>
+                    onClick={() => {
+                      navigate("/perfil");
+                      setMenuUsuarioAberto(false);
+                    }}
+                  >
+                    Dados da conta
+                  </button>
 
                   <button
                     className="dropdown-logout"

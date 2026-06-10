@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
+import { mascararEmail } from "./utils/mascararDados";
 
 function Perfil() {
   const navigate = useNavigate();
@@ -16,6 +17,9 @@ function Perfil() {
     coxa: "",
     panturrilha: "",
   });
+
+  const [novoEmail, setNovoEmail] = useState("");
+  const [confirmarEmail, setConfirmarEmail] = useState("");
 
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
@@ -101,13 +105,8 @@ function Perfil() {
       [campo]: valor,
     }));
 
-    if (campo === "peso") {
-      setCalcPeso(valor);
-    }
-
-    if (campo === "altura") {
-      setCalcAltura(valor);
-    }
+    if (campo === "peso") setCalcPeso(valor);
+    if (campo === "altura") setCalcAltura(valor);
   };
 
   const atualizarPerfil = async () => {
@@ -126,6 +125,43 @@ function Perfil() {
     }
   };
 
+  const alterarEmail = async () => {
+    if (!novoEmail || !confirmarEmail) {
+      alert("Preencha os dois campos de e-mail.");
+      return;
+    }
+
+    const emailFormatado = novoEmail.trim().toLowerCase();
+    const confirmarEmailFormatado = confirmarEmail.trim().toLowerCase();
+
+    if (emailFormatado !== confirmarEmailFormatado) {
+      alert("Os e-mails não coincidem.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.put(
+        "http://localhost:3000/usuarios/alterar-email",
+        { novoEmail: emailFormatado },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      localStorage.setItem("email", emailFormatado);
+
+      alert("E-mail alterado com sucesso!");
+      setNovoEmail("");
+      setConfirmarEmail("");
+    } catch (error) {
+      alert(error.response?.data?.erro || "Erro ao alterar e-mail");
+    }
+  };
+
   const alterarSenha = async () => {
     if (!novaSenha || !confirmarSenha) {
       alert("Preencha os dois campos de senha.");
@@ -134,6 +170,16 @@ function Perfil() {
 
     if (novaSenha !== confirmarSenha) {
       alert("As senhas não coincidem.");
+      return;
+    }
+
+    const senhaValida =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_\-+=/\\[\]]).{8,}$/;
+
+    if (!senhaValida.test(novaSenha)) {
+      alert(
+        "A senha deve conter no mínimo 8 caracteres, uma letra maiúscula, uma letra minúscula, um número e um caractere especial."
+      );
       return;
     }
 
@@ -245,7 +291,7 @@ function Perfil() {
             </p>
 
             <p>
-              <strong>E-mail:</strong> {emailUsuario}
+              <strong>E-mail:</strong> {mascararEmail(emailUsuario)}
             </p>
 
             <p>
@@ -324,6 +370,26 @@ function Perfil() {
               )}
             </div>
           </div>
+        </section>
+
+        <section className="chart-card">
+          <h2>Alterar e-mail</h2>
+
+          <input
+            type="email"
+            placeholder="Novo e-mail"
+            value={novoEmail}
+            onChange={(e) => setNovoEmail(e.target.value)}
+          />
+
+          <input
+            type="email"
+            placeholder="Confirmar novo e-mail"
+            value={confirmarEmail}
+            onChange={(e) => setConfirmarEmail(e.target.value)}
+          />
+
+          <button onClick={alterarEmail}>Alterar e-mail</button>
         </section>
 
         <section className="chart-card">
