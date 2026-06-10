@@ -981,3 +981,661 @@ button:hover {
   background: #dc2626;
   color: #ffffff;
 }
+
+.profile-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.calculator-card-mini {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.calculator-card-mini h3 {
+  margin-top: 18px;
+  margin-bottom: 10px;
+  color: #e5e7eb;
+}
+
+.calc-description {
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.calc-grid-three {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.calc-result {
+  background: rgba(37, 99, 235, 0.14);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #e5e7eb;
+  margin-top: 8px;
+}
+
+.calc-results-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+  .profile-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .calc-grid,
+  .calc-grid-three {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-layout {
+  min-height: 100vh;
+  display: flex;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+.admin-sidebar {
+  width: 280px;
+  background: linear-gradient(180deg, #020617, #0f172a);
+  border-right: 1px solid rgba(59, 130, 246, 0.18);
+  padding: 28px 20px;
+}
+
+.admin-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.admin-logo h2 span {
+  color: #3b82f6;
+}
+
+.admin-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-menu button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: transparent;
+  color: #cbd5e1;
+  border: 1px solid transparent;
+  padding: 14px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+  text-align: left;
+}
+
+.admin-menu button:hover,
+.admin-menu button.active {
+  background: rgba(37, 99, 235, 0.18);
+  border-color: rgba(59, 130, 246, 0.55);
+  color: #fff;
+}
+
+.admin-main {
+  flex: 1;
+  padding: 32px 42px;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.admin-header h1 {
+  font-size: 34px;
+  margin-bottom: 8px;
+}
+
+.admin-header p {
+  color: #94a3b8;
+}
+
+.admin-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #0f172a;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.admin-filter input {
+  width: 150px;
+  background: transparent;
+  border: none;
+  color: #fff;
+}
+
+.admin-filter button {
+  padding: 10px 16px;
+}
+
+.clear-filter {
+  background: #1e293b !important;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+  margin-bottom: 26px;
+}
+
+.admin-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 28px;
+  border-radius: 18px;
+  background: #0f172a;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.admin-stat-card h2 {
+  font-size: 38px;
+  margin: 0;
+}
+
+.admin-stat-card p {
+  margin: 4px 0;
+  font-weight: 800;
+}
+
+.admin-stat-card span {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.stat-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+  font-weight: 900;
+}
+
+.blue .stat-icon {
+  background: rgba(37, 99, 235, 0.25);
+  color: #60a5fa;
+}
+
+.purple .stat-icon {
+  background: rgba(126, 34, 206, 0.25);
+  color: #c084fc;
+}
+
+.green .stat-icon {
+  background: rgba(22, 163, 74, 0.25);
+  color: #4ade80;
+}
+
+.yellow .stat-icon {
+  background: rgba(202, 138, 4, 0.25);
+  color: #facc15;
+}
+
+.admin-search {
+  width: 520px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #0f172a;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 12px;
+  padding: 0 16px;
+  margin-bottom: 22px;
+}
+
+.admin-search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #fff;
+}
+
+.admin-card {
+  background: #0f172a;
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 22px;
+}
+
+.admin-card h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.admin-table {
+  overflow-x: auto;
+}
+
+.admin-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th {
+  color: #94a3b8;
+  font-size: 14px;
+  text-align: left;
+  padding: 14px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.admin-table td {
+  padding: 14px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #2563eb;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.badge {
+  display: inline-block;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.badge.admin {
+  background: rgba(202, 138, 4, 0.18);
+  color: #facc15;
+  border: 1px solid rgba(202, 138, 4, 0.35);
+}
+
+.badge.user {
+  background: rgba(22, 163, 74, 0.18);
+  color: #4ade80;
+  border: 1px solid rgba(22, 163, 74, 0.35);
+}
+
+.delete-button,
+.blocked-button {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.delete-button {
+  background: rgba(220, 38, 38, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(220, 38, 38, 0.4);
+}
+
+.blocked-button {
+  background: rgba(148, 163, 184, 0.12);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  cursor: not-allowed;
+}
+
+@media (max-width: 1100px) {
+  .admin-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-header {
+    flex-direction: column;
+  }
+
+  .admin-search {
+    width: 100%;
+  }
+}
+
+/* Deixa o ícone nativo do calendário branco */
+.admin-filter input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.9;
+  cursor: pointer;
+}
+
+/* Corrige a pesquisa com box duplicada */
+.admin-search {
+  height: 54px;
+  padding: 0 16px;
+}
+
+.admin-search input {
+  height: 100%;
+  width: 100%;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* ========================= */
+/* HOME DASHBOARD PREMIUM */
+/* ========================= */
+
+.dashboard {
+  background: #020617;
+}
+
+.sidebar {
+  width: 280px;
+  padding: 32px 22px;
+  background: linear-gradient(180deg, #020617, #0f172a);
+  border-right: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.sidebar .logo {
+  margin-bottom: 42px;
+}
+
+.sidebar nav {
+  gap: 14px;
+}
+
+.sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  color: #e5e7eb;
+  font-size: 17px;
+  font-weight: 700;
+  transition: 0.2s;
+}
+
+.sidebar nav a svg {
+  font-size: 22px;
+}
+
+.sidebar nav a:hover,
+.sidebar nav a.active {
+  background: rgba(37, 99, 235, 0.24);
+  color: #fff;
+}
+
+.main-content {
+  padding: 36px 42px;
+}
+
+.dashboard-header {
+  margin-bottom: 32px;
+}
+
+.dashboard-header h1 {
+  font-size: 38px;
+  font-weight: 900;
+}
+
+.dashboard-header p {
+  font-size: 17px;
+  color: #94a3b8;
+}
+
+.new-workout-button {
+  height: 56px;
+  padding: 0 28px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-size: 17px;
+}
+
+.user-menu-button {
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  min-height: 160px;
+  padding: 26px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #111827, #0f172a);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.home-stat-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+  margin-bottom: 16px;
+}
+
+.home-stat-icon.blue {
+  background: rgba(37, 99, 235, 0.3);
+  color: #60a5fa;
+}
+
+.home-stat-icon.green {
+  background: rgba(22, 163, 74, 0.3);
+  color: #4ade80;
+}
+
+.home-stat-icon.purple {
+  background: rgba(126, 34, 206, 0.3);
+  color: #c084fc;
+}
+
+.home-stat-icon.orange {
+  background: rgba(249, 115, 22, 0.3);
+  color: #fb923c;
+}
+
+.home-stat-icon.small {
+  width: 58px;
+  height: 58px;
+  font-size: 26px;
+  margin-bottom: 0;
+}
+
+.stat-card p {
+  font-size: 16px;
+  color: #cbd5e1;
+}
+
+.stat-card h2 {
+  font-size: 31px;
+  font-weight: 900;
+}
+
+.next-workout {
+  min-height: 160px;
+  padding: 32px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #0b5cff, #2563eb, #6d28d9);
+  margin-bottom: 24px;
+}
+
+.next-workout h2 {
+  font-size: 36px;
+}
+
+.next-workout p,
+.next-workout span {
+  font-size: 17px;
+}
+
+.next-workout button {
+  height: 56px;
+  min-width: 190px;
+  font-size: 17px;
+  background: #f8fafc;
+  color: #020617;
+}
+
+.home-content-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+
+.chart-card {
+  padding: 28px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #111827, #0f172a);
+  border: 1px solid rgba(59, 130, 246, 0.22);
+}
+
+.chart-card h2 {
+  font-size: 27px;
+  margin-bottom: 22px;
+}
+
+.progress-chart {
+  height: 260px;
+}
+
+.quick-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.summary-item p {
+  margin: 0 0 4px;
+  color: #94a3b8;
+}
+
+.summary-item strong {
+  display: block;
+  font-size: 18px;
+  color: #fff;
+}
+
+.summary-item span {
+  color: #cbd5e1;
+  font-size: 14px;
+}
+
+.home-training-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.home-training-table th,
+.home-training-table td {
+  padding: 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  text-align: left;
+}
+
+.home-training-table th {
+  color: #94a3b8;
+}
+
+.training-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.training-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+
+.highlight-volume {
+  color: #3b82f6;
+  font-weight: 900;
+}
+
+.home-delete-button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: rgba(220, 38, 38, 0.16);
+  color: #f87171;
+  border: 1px solid rgba(220, 38, 38, 0.4);
+}
+
+.empty-text {
+  color: #94a3b8;
+  font-size: 16px;
+}
+
+@media (max-width: 1100px) {
+  .stats-grid,
+  .home-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    width: 230px;
+  }
+}

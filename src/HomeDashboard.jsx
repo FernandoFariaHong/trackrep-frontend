@@ -1,6 +1,19 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
+import {
+  FiHome,
+  FiActivity,
+  FiBarChart2,
+  FiUser,
+  FiShield,
+  FiCalendar,
+  FiClock,
+  FiTrendingUp,
+  FiZap,
+  FiPlus,
+  FiTrash2,
+} from "react-icons/fi";
 
 function HomeDashboard() {
   const [treinos, setTreinos] = useState([]);
@@ -11,6 +24,8 @@ function HomeDashboard() {
   const location = useLocation();
 
   const nomeUsuario = localStorage.getItem("nome") || "Usuário";
+  const isAdmin = localStorage.getItem("is_admin") === "1";
+
   const horaAtual = new Date().getHours();
 
   const saudacao =
@@ -68,9 +83,7 @@ function HomeDashboard() {
   };
 
   const sairDaConta = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("nome");
-    localStorage.removeItem("email");
+    localStorage.clear();
     navigate("/");
   };
 
@@ -89,6 +102,10 @@ function HomeDashboard() {
 
   const volumeTotal = treinos.reduce((total, treino) => {
     return total + (Number(treino.volume_total) || 0);
+  }, 0);
+
+  const totalSeries = treinos.reduce((total, treino) => {
+    return total + (Number(treino.total_series) || 0);
   }, 0);
 
   const minutosTotais = treinos.length * 45;
@@ -136,6 +153,16 @@ function HomeDashboard() {
     })
     .join(" ");
 
+  const ultimoTreino = [...treinos].sort(
+    (a, b) => new Date(b.data_treino) - new Date(a.data_treino)
+  )[0];
+
+  const maiorVolume = treinos.reduce((maior, treino) => {
+    return Number(treino.volume_total) > Number(maior?.volume_total || 0)
+      ? treino
+      : maior;
+  }, null);
+
   return (
     <div className="dashboard">
       <aside className="sidebar">
@@ -151,22 +178,38 @@ function HomeDashboard() {
             className={location.pathname === "/home" ? "active" : ""}
             onClick={() => navigate("/home")}
           >
-            Início
+            <FiHome /> Início
           </a>
 
           <a
             className={location.pathname === "/treinos" ? "active" : ""}
             onClick={() => navigate("/treinos")}
           >
-            Treinos
+            <FiActivity /> Treinos
           </a>
 
           <a
             className={location.pathname === "/estatisticas" ? "active" : ""}
             onClick={() => navigate("/estatisticas")}
           >
-            Estatísticas
+            <FiBarChart2 /> Estatísticas
           </a>
+
+          <a
+            className={location.pathname === "/perfil" ? "active" : ""}
+            onClick={() => navigate("/perfil")}
+          >
+            <FiUser /> Dados da conta
+          </a>
+
+          {isAdmin && (
+            <a
+              className={location.pathname === "/admin" ? "active" : ""}
+              onClick={() => navigate("/admin")}
+            >
+              <FiShield /> Dashboard ADM
+            </a>
+          )}
         </nav>
       </aside>
 
@@ -176,7 +219,7 @@ function HomeDashboard() {
             <h1>
               {saudacao}, {nomeUsuario} 💪
             </h1>
-            <p>Foco no progresso. Cada treino conta.</p>
+            <p>Seu resumo de evolução no TrackRep.</p>
           </div>
 
           <div className="header-actions">
@@ -184,7 +227,7 @@ function HomeDashboard() {
               className="new-workout-button"
               onClick={() => navigate("/treinos")}
             >
-              Novo treino +
+              <FiPlus /> Novo treino
             </button>
 
             <div className="user-menu">
@@ -232,6 +275,9 @@ function HomeDashboard() {
 
         <section className="stats-grid">
           <div className="stat-card">
+            <div className="home-stat-icon blue">
+              <FiCalendar />
+            </div>
             <p>Treinos esta semana</p>
             <h2>
               {treinosEstaSemana} <span>de 4</span>
@@ -239,19 +285,26 @@ function HomeDashboard() {
           </div>
 
           <div className="stat-card">
-            <p>Tempo total</p>
-            <h2>
-              {horas}h {minutos}m
-            </h2>
-          </div>
-
-          <div className="stat-card">
+            <div className="home-stat-icon green">
+              <FiTrendingUp />
+            </div>
             <p>Volume total</p>
             <h2>{volumeTotal.toLocaleString("pt-BR")} kg</h2>
           </div>
 
           <div className="stat-card">
-            <p>Sequência</p>
+            <div className="home-stat-icon purple">
+              <FiActivity />
+            </div>
+            <p>Total de séries</p>
+            <h2>{totalSeries}</h2>
+          </div>
+
+          <div className="stat-card">
+            <div className="home-stat-icon orange">
+              <FiZap />
+            </div>
+            <p>Sequência atual</p>
             <h2>{sequencia} dias</h2>
           </div>
         </section>
@@ -260,46 +313,110 @@ function HomeDashboard() {
           <div>
             <p>Próximo treino</p>
             <h2>Peito e Bíceps</h2>
-            <span>8 exercícios • ~1h 10m</span>
+            <span>8 exercícios • Estimado 1h10min</span>
           </div>
 
           <button onClick={() => navigate("/treinos")}>Iniciar treino ▶</button>
         </section>
 
-        <section className="chart-card">
-          <h2>Progressão de carga</h2>
+        <section className="home-content-grid">
+          <div className="chart-card">
+            <h2>Progressão de carga</h2>
 
-          <svg viewBox="0 0 540 260" className="progress-chart">
-            <polyline
-              points={pontosGrafico}
-              fill="none"
-              stroke="#3b82f6"
-              strokeWidth="4"
-            />
+            {progressaoCarga.length === 0 ? (
+              <p className="empty-text">Nenhum treino registrado ainda.</p>
+            ) : (
+              <svg viewBox="0 0 540 260" className="progress-chart">
+                <polyline
+                  points={pontosGrafico}
+                  fill="none"
+                  stroke="#3b82f6"
+                  strokeWidth="4"
+                />
 
-            {progressaoCarga.map((item, index) => {
-              const x = 40 + index * 90;
-              const y = 220 - (item.carga / maiorCarga) * 180;
+                {progressaoCarga.map((item, index) => {
+                  const x = 40 + index * 90;
+                  const y = 220 - (item.carga / maiorCarga) * 180;
 
-              return (
-                <g key={`${item.label}-${index}`}>
-                  <circle cx={x} cy={y} r="6" fill="#3b82f6" />
-                  <text
-                    x={x}
-                    y="245"
-                    textAnchor="middle"
-                    fill="#ffffff"
-                    fontSize="12"
-                  >
-                    {item.label}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
+                  return (
+                    <g key={`${item.label}-${index}`}>
+                      <circle cx={x} cy={y} r="6" fill="#3b82f6" />
+                      <text
+                        x={x}
+                        y="245"
+                        textAnchor="middle"
+                        fill="#ffffff"
+                        fontSize="12"
+                      >
+                        {item.label}
+                      </text>
+                    </g>
+                  );
+                })}
+              </svg>
+            )}
+          </div>
+
+          <div className="chart-card quick-summary">
+            <h2>Resumo rápido</h2>
+
+            <div className="summary-item">
+              <div className="home-stat-icon blue small">
+                <FiCalendar />
+              </div>
+
+              <div>
+                <p>Último treino</p>
+                <strong>
+                  {ultimoTreino
+                    ? new Date(ultimoTreino.data_treino).toLocaleDateString("pt-BR")
+                    : "Nenhum treino"}
+                </strong>
+                <span>
+                  {ultimoTreino
+                    ? `${ultimoTreino.total_series} séries`
+                    : "Registre seu primeiro treino"}
+                </span>
+              </div>
+            </div>
+
+            <div className="summary-item">
+              <div className="home-stat-icon green small">
+                <FiTrendingUp />
+              </div>
+
+              <div>
+                <p>Maior volume</p>
+                <strong>
+                  {maiorVolume
+                    ? `${Number(maiorVolume.volume_total).toLocaleString("pt-BR")} kg`
+                    : "0 kg"}
+                </strong>
+                <span>
+                  {maiorVolume
+                    ? new Date(maiorVolume.data_treino).toLocaleDateString("pt-BR")
+                    : "Sem registros"}
+                </span>
+              </div>
+            </div>
+
+            <div className="summary-item">
+              <div className="home-stat-icon purple small">
+                <FiClock />
+              </div>
+
+              <div>
+                <p>Tempo estimado</p>
+                <strong>
+                  {horas}h {minutos}m
+                </strong>
+                <span>Baseado nos treinos registrados</span>
+              </div>
+            </div>
+          </div>
         </section>
 
-        <section>
+        <section className="chart-card">
           <h2>Treinos recentes</h2>
           <ListaTreinos treinos={treinos} excluirTreino={excluirTreino} />
         </section>
@@ -329,56 +446,56 @@ function HomeDashboard() {
 }
 
 function ListaTreinos({ treinos, excluirTreino }) {
+  if (treinos.length === 0) {
+    return <p className="empty-text">Nenhum treino ainda.</p>;
+  }
+
   return (
-    <div className="recent-list">
-      {treinos.length === 0 ? (
-        <p>Nenhum treino ainda.</p>
-      ) : (
-        treinos.map((t) => (
-          <div className="recent-card" key={t.id}>
-            <div style={{ position: "relative" }}>
-              <h3 style={{ marginBottom: "12px" }}>
-                Treino {new Date(t.data_treino).toLocaleDateString("pt-BR")}
-              </h3>
+    <div className="home-training-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Treino</th>
+            <th>Data</th>
+            <th>Volume total</th>
+            <th>Séries</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
 
-              <p style={{ margin: "8px 0" }}>
-                🏋️ {t.total_series} séries
-              </p>
+        <tbody>
+          {treinos.map((t) => (
+            <tr key={t.id}>
+              <td>
+                <div className="training-name-cell">
+                  <div className="training-icon">
+                    <FiActivity />
+                  </div>
+                  <strong>Treino registrado</strong>
+                </div>
+              </td>
 
-              <p style={{ margin: "8px 0" }}>
-                📈 Volume:{" "}
+              <td>{new Date(t.data_treino).toLocaleDateString("pt-BR")}</td>
+
+              <td className="highlight-volume">
                 {Number(t.volume_total).toLocaleString("pt-BR")} kg
-              </p>
+              </td>
 
-              <div style={{ marginTop: "12px" }}>
-                {t.exercicios?.map((exercicio, index) => (
-                  <p key={index} style={{ margin: "6px 0" }}>
-                    {exercicio.total_series} sets {exercicio.nome}
-                  </p>
-                ))}
-              </div>
+              <td>{t.total_series}</td>
 
-              <button
-                type="button"
-                onClick={() => excluirTreino(t.id)}
-                style={{
-                  position: "absolute",
-                  top: "0",
-                  right: "0",
-                  background: "#dc2626",
-                  color: "#ffffff",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "6px 10px",
-                  cursor: "pointer",
-                }}
-              >
-                Excluir
-              </button>
-            </div>
-          </div>
-        ))
-      )}
+              <td>
+                <button
+                  type="button"
+                  className="home-delete-button"
+                  onClick={() => excluirTreino(t.id)}
+                >
+                  <FiTrash2 />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

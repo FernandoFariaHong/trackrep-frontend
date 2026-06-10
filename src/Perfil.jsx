@@ -22,8 +22,40 @@ function Perfil() {
   const [mostrarNovaSenha, setMostrarNovaSenha] = useState(false);
   const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
 
+  const [calcPeso, setCalcPeso] = useState("");
+  const [calcAltura, setCalcAltura] = useState("");
+  const [calcCarga, setCalcCarga] = useState("");
+  const [calcReps, setCalcReps] = useState("");
+  const [calcSeries, setCalcSeries] = useState("");
+
   const nomeUsuario = localStorage.getItem("nome") || "Usuário";
   const emailUsuario = localStorage.getItem("email") || "E-mail não informado";
+  const isAdmin = localStorage.getItem("is_admin");
+
+  const imc =
+    calcPeso && calcAltura
+      ? (Number(calcPeso) / (Number(calcAltura) * Number(calcAltura))).toFixed(2)
+      : null;
+
+  const classificacaoImc = imc
+    ? Number(imc) < 18.5
+      ? "Abaixo do peso"
+      : Number(imc) < 25
+      ? "Peso normal"
+      : Number(imc) < 30
+      ? "Sobrepeso"
+      : "Obesidade"
+    : null;
+
+  const volumeTreino =
+    calcCarga && calcReps && calcSeries
+      ? Number(calcCarga) * Number(calcReps) * Number(calcSeries)
+      : null;
+
+  const cargaMaxima =
+    calcCarga && calcReps
+      ? (Number(calcCarga) * (1 + Number(calcReps) / 30)).toFixed(1)
+      : null;
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -55,6 +87,9 @@ function Perfil() {
         coxa: response.data.coxa || "",
         panturrilha: response.data.panturrilha || "",
       });
+
+      setCalcPeso(response.data.peso || "");
+      setCalcAltura(response.data.altura || "");
     } catch (error) {
       console.error("Erro ao buscar perfil:", error);
     }
@@ -65,6 +100,14 @@ function Perfil() {
       ...perfilAnterior,
       [campo]: valor,
     }));
+
+    if (campo === "peso") {
+      setCalcPeso(valor);
+    }
+
+    if (campo === "altura") {
+      setCalcAltura(valor);
+    }
   };
 
   const atualizarPerfil = async () => {
@@ -189,24 +232,98 @@ function Perfil() {
         <header className="dashboard-header">
           <div>
             <h1>Dados da conta</h1>
-            <p>Gerencie suas informações pessoais e medidas corporais.</p>
+            <p>Gerencie suas informações pessoais, medidas e cálculos fitness.</p>
           </div>
         </header>
 
-        <section className="chart-card">
-          <h2>Informações do usuário</h2>
+        <section className="chart-card profile-info-grid">
+          <div>
+            <h2>Informações do usuário</h2>
 
-          <p>
-            <strong>Nome:</strong> {nomeUsuario}
-          </p>
+            <p>
+              <strong>Nome:</strong> {nomeUsuario}
+            </p>
 
-          <p>
-            <strong>E-mail:</strong> {emailUsuario}
-          </p>
+            <p>
+              <strong>E-mail:</strong> {emailUsuario}
+            </p>
 
-          <p>
-            <strong>Senha:</strong> ********
-          </p>
+            <p>
+              <strong>Senha:</strong> ********
+            </p>
+          </div>
+
+          <div className="calculator-card-mini">
+            <h2>Calculadora Fitness</h2>
+
+            <p className="calc-description">
+              Calcule seu IMC, volume de treino e carga máxima estimada.
+            </p>
+
+            <h3>IMC</h3>
+
+            <div className="calc-grid">
+              <input
+                type="number"
+                placeholder="Peso em kg"
+                value={calcPeso}
+                onChange={(e) => setCalcPeso(e.target.value)}
+              />
+
+              <input
+                type="number"
+                placeholder="Altura em metros. Ex: 1.75"
+                value={calcAltura}
+                onChange={(e) => setCalcAltura(e.target.value)}
+              />
+            </div>
+
+            {imc && (
+              <div className="calc-result">
+                <strong>IMC:</strong> {imc} — {classificacaoImc}
+              </div>
+            )}
+
+            <h3>Volume e 1RM</h3>
+
+            <div className="calc-grid calc-grid-three">
+              <input
+                type="number"
+                placeholder="Carga em kg"
+                value={calcCarga}
+                onChange={(e) => setCalcCarga(e.target.value)}
+              />
+
+              <input
+                type="number"
+                placeholder="Repetições"
+                value={calcReps}
+                onChange={(e) => setCalcReps(e.target.value)}
+              />
+
+              <input
+                type="number"
+                placeholder="Séries"
+                value={calcSeries}
+                onChange={(e) => setCalcSeries(e.target.value)}
+              />
+            </div>
+
+            <div className="calc-results-row">
+              {volumeTreino && (
+                <div className="calc-result">
+                  <strong>Volume:</strong>{" "}
+                  {volumeTreino.toLocaleString("pt-BR")} kg
+                </div>
+              )}
+
+              {cargaMaxima && (
+                <div className="calc-result">
+                  <strong>1RM estimado:</strong> {cargaMaxima} kg
+                </div>
+              )}
+            </div>
+          </div>
         </section>
 
         <section className="chart-card">
@@ -240,9 +357,7 @@ function Perfil() {
             <button
               type="button"
               className="eye-button"
-              onClick={() =>
-                setMostrarConfirmarSenha(!mostrarConfirmarSenha)
-              }
+              onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
             >
               {mostrarConfirmarSenha ? <FiEye /> : <FiEyeOff />}
             </button>
@@ -300,9 +415,7 @@ function Perfil() {
             type="number"
             placeholder="Panturrilha em cm"
             value={perfil.panturrilha}
-            onChange={(e) =>
-              atualizarCampoPerfil("panturrilha", e.target.value)
-            }
+            onChange={(e) => atualizarCampoPerfil("panturrilha", e.target.value)}
           />
 
           <button onClick={atualizarPerfil}>Salvar medidas</button>
@@ -314,15 +427,17 @@ function Perfil() {
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
             <button onClick={sairDaConta}>Sair da conta</button>
 
-            <button
-              onClick={excluirConta}
-              style={{
-                background: "#dc2626",
-                color: "#fff",
-              }}
-            >
-              Excluir conta
-            </button>
+            {isAdmin !== "1" && (
+              <button
+                onClick={excluirConta}
+                style={{
+                  background: "#dc2626",
+                  color: "#fff",
+                }}
+              >
+                Excluir conta
+              </button>
+            )}
           </div>
         </section>
       </main>
