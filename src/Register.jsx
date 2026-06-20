@@ -119,45 +119,59 @@ function Register() {
 
         <p>Crie sua conta para acompanhar seus treinos e sua evolução.</p>
 
-        <form onSubmit={handleRegister}>
-          <input
-            type="text"
-            placeholder="Nome"
-            value={nome}
-            onChange={(e) => {
-              setNome(e.target.value);
-              sessionStorage.setItem("cadastro_nome", e.target.value);
-            }}
-            required
-          />
-
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              sessionStorage.setItem("cadastro_email", e.target.value);
-            }}
-            required
-          />
-
-          <div className="password-field">
+        <form onSubmit={handleRegister} className="form">
+          <div className="form-group">
+            <label htmlFor="nome">Nome completo</label>
             <input
-              type={mostrarSenha ? "text" : "password"}
-              placeholder="Senha"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
+              id="nome"
+              type="text"
+              placeholder="Digite seu nome completo"
+              value={nome}
+              onChange={(e) => {
+                setNome(e.target.value);
+                sessionStorage.setItem("cadastro_nome", e.target.value);
+              }}
               required
             />
+          </div>
 
-            <button
-              type="button"
-              className="eye-button"
-              onClick={() => setMostrarSenha(!mostrarSenha)}
-            >
-              {mostrarSenha ? <FiEye /> : <FiEyeOff />}
-            </button>
+          <div className="form-group">
+            <label htmlFor="email">E-mail</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Digite seu e-mail"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                sessionStorage.setItem("cadastro_email", e.target.value);
+              }}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="senha">Senha</label>
+
+            <div className="password-field">
+              <input
+                id="senha"
+                type={mostrarSenha ? "text" : "password"}
+                placeholder="Digite sua senha"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                required
+              />
+
+              <button
+                type="button"
+                className="eye-button"
+                onClick={() => setMostrarSenha(!mostrarSenha)}
+                aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+              >
+                {mostrarSenha ? <FiEyeOff /> : <FiEye />}
+              </button>
+            </div>
           </div>
 
           {senha && (
@@ -195,34 +209,45 @@ function Register() {
             </>
           )}
 
-          <div className="password-field">
-            <input
-              type={mostrarConfirmarSenha ? "text" : "password"}
-              placeholder="Confirmar senha"
-              value={confirmarSenha}
-              onChange={(e) => setConfirmarSenha(e.target.value)}
-              required
-            />
+          <div className="form-group">
+            <label htmlFor="confirmarSenha">Confirmar senha</label>
 
-            <button
-              type="button"
-              className="eye-button"
-              onClick={() =>
-                setMostrarConfirmarSenha(!mostrarConfirmarSenha)
-              }
-            >
-              {mostrarConfirmarSenha ? <FiEye /> : <FiEyeOff />}
-            </button>
+            <div className="password-field">
+              <input
+                id="confirmarSenha"
+                type={mostrarConfirmarSenha ? "text" : "password"}
+                placeholder="Digite novamente sua senha"
+                value={confirmarSenha}
+                onChange={(e) => setConfirmarSenha(e.target.value)}
+                required
+              />
+
+              <button
+                type="button"
+                className="eye-button"
+                onClick={() =>
+                  setMostrarConfirmarSenha(!mostrarConfirmarSenha)
+                }
+                aria-label={
+                  mostrarConfirmarSenha
+                    ? "Ocultar confirmação de senha"
+                    : "Mostrar confirmação de senha"
+                }
+              >
+                {mostrarConfirmarSenha ? <FiEyeOff /> : <FiEye />}
+              </button>
+            </div>
           </div>
 
           <div className="terms">
             <input
+              id="termos"
               type="checkbox"
               checked={aceitouTermos}
               onChange={(e) => setAceitouTermos(e.target.checked)}
             />
 
-            <label>
+            <label htmlFor="termos">
               Declaro que li e aceito os Termos de Uso e a Política de
               Privacidade.{" "}
               <span

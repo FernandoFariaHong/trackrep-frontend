@@ -11,6 +11,7 @@ function Treinos() {
   const [mostrarModalExercicio, setMostrarModalExercicio] = useState(false);
   const [exerciciosTreino, setExerciciosTreino] = useState([]);
   const [nomeExercicio, setNomeExercicio] = useState("");
+
   const [dataTreino, setDataTreino] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -44,6 +45,7 @@ function Treinos() {
 
   useEffect(() => {
     if (location.state?.abrirModalExercicio) {
+      iniciarTreino();
       setMostrarModalExercicio(true);
       navigate(location.pathname, { replace: true });
     }
@@ -77,6 +79,44 @@ function Treinos() {
     }
   };
 
+  const iniciarTreino = () => {
+    setTreinoEmAndamento(true);
+    setCronometroAtivo(false);
+    setTempoTreino(0);
+    setExerciciosTreino([]);
+    setDataTreino(new Date().toISOString().split("T")[0]);
+    setMostrarModalExercicio(true);
+  };
+
+  const alternarCronometro = () => {
+    if (exerciciosTreino.length === 0) {
+      alert("Adicione pelo menos um exercício antes de iniciar o tempo.");
+      return;
+    }
+
+    setCronometroAtivo(!cronometroAtivo);
+  };
+
+  const cancelarTreino = () => {
+    const confirmar = window.confirm(
+      "Tem certeza que deseja descartar este treino? Nenhum dado será salvo."
+    );
+
+    if (!confirmar) return;
+
+    setExerciciosTreino([]);
+    setTreinoEmAndamento(false);
+    setCronometroAtivo(false);
+    setTempoTreino(0);
+    setDataTreino(new Date().toISOString().split("T")[0]);
+  };
+
+  const sairDaConta = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    navigate("/login");
+  };
+
   const excluirTreino = async (id) => {
     const confirmar = window.confirm(
       "Tem certeza que deseja excluir este treino?"
@@ -101,13 +141,6 @@ function Treinos() {
     }
   };
 
-  const sairDaConta = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("nome");
-    localStorage.removeItem("email");
-    navigate("/");
-  };
-
   const formatarTempo = (segundos) => {
     const horas = Math.floor(segundos / 3600);
     const minutos = Math.floor((segundos % 3600) / 60);
@@ -125,19 +158,20 @@ function Treinos() {
   };
 
   const adicionarExercicio = () => {
-    if (!nomeExercicio.trim()) return;
-
-    if (!treinoEmAndamento) {
-      setTempoTreino(0);
-      setCronometroAtivo(true);
+    if (!nomeExercicio.trim()) {
+      alert("Informe o nome do exercício.");
+      return;
     }
 
-    setTreinoEmAndamento(true);
+    if (!treinoEmAndamento) {
+      alert("Inicie um treino antes de adicionar exercícios.");
+      return;
+    }
 
     setExerciciosTreino([
       ...exerciciosTreino,
       {
-        nome: nomeExercicio,
+        nome: nomeExercicio.trim(),
         series: [{ carga: "", reps: "" }],
       },
     ]);
@@ -183,11 +217,36 @@ function Treinos() {
     setExerciciosTreino(novosExercicios);
   };
 
-  const salvarTreino = async () => {
+  const validarTreinoAntesDeFinalizar = () => {
     if (exerciciosTreino.length === 0) {
-      alert("Adicione pelo menos um exercício antes de salvar.");
-      return;
+      alert("Adicione pelo menos um exercício antes de finalizar o treino.");
+      return false;
     }
+
+    for (const exercicio of exerciciosTreino) {
+      if (!exercicio.series || exercicio.series.length === 0) {
+        alert(`Adicione pelo menos uma série para ${exercicio.nome}.`);
+        return false;
+      }
+
+      for (const serie of exercicio.series) {
+        if (!serie.carga || Number(serie.carga) <= 0) {
+          alert(`Informe a carga em todas as séries de ${exercicio.nome}.`);
+          return false;
+        }
+
+        if (!serie.reps || Number(serie.reps) <= 0) {
+          alert(`Informe as repetições em todas as séries de ${exercicio.nome}.`);
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+
+  const finalizarTreino = async () => {
+    if (!validarTreinoAntesDeFinalizar()) return;
 
     try {
       const token = localStorage.getItem("token");
@@ -205,7 +264,7 @@ function Treinos() {
         }
       );
 
-      alert("Treino salvo com sucesso!");
+      alert("Treino finalizado com sucesso!");
 
       setExerciciosTreino([]);
       setTreinoEmAndamento(false);
@@ -215,7 +274,7 @@ function Treinos() {
 
       await buscarTreinos();
     } catch (error) {
-      alert(error.response?.data?.erro || "Erro ao salvar treino");
+      alert(error.response?.data?.erro || "Erro ao finalizar treino");
     }
   };
 
@@ -223,18 +282,6 @@ function Treinos() {
     (total, exercicio) => total + exercicio.series.length,
     0
   );
-
-  const volumeTotal = exerciciosTreino.reduce((total, exercicio) => {
-    const volumeExercicio = exercicio.series.reduce((subtotal, serie) => {
-      const carga = Number(serie.carga) || 0;
-      const reps = Number(serie.reps) || 0;
-
-      return subtotal + carga * reps;
-    }, 0);
-
-    return total + volumeExercicio;
-  }, 0);
-
   return (
     <div className="dashboard">
       <aside className="sidebar">
@@ -275,16 +322,25 @@ function Treinos() {
             <h1>
               {saudacao}, {nomeUsuario} 💪
             </h1>
-            <p>Gerencie seus treinos cadastrados.</p>
+            <p>
+              Inicie um treino, registre exercícios e finalize apenas quando
+              todas as séries estiverem preenchidas.
+            </p>
           </div>
 
           <div className="header-actions">
-            <button
-              className="new-workout-button"
-              onClick={() => setMostrarModalExercicio(true)}
-            >
-              + Adicionar Exercício
-            </button>
+            {!treinoEmAndamento ? (
+              <button className="new-workout-button" onClick={iniciarTreino}>
+                Novo treino
+              </button>
+            ) : (
+              <button
+                className="new-workout-button"
+                onClick={() => setMostrarModalExercicio(true)}
+              >
+                + Adicionar exercício
+              </button>
+            )}
 
             <div className="user-menu">
               <button
@@ -331,7 +387,7 @@ function Treinos() {
 
         {treinoEmAndamento ? (
           <section className="chart-card training-card">
-            <h2>Treinamento</h2>
+            <h2>Treino em andamento</h2>
 
             <div className="training-stats">
               <div className="training-stat">
@@ -340,109 +396,131 @@ function Treinos() {
               </div>
 
               <div className="training-stat">
-                <p>Volume</p>
-                <h3>{volumeTotal} kg</h3>
-              </div>
-
-              <div className="training-stat">
-                <p>Séries</p>
+                <p>Séries registradas</p>
                 <h3>{totalSeries}</h3>
               </div>
             </div>
 
-            {exerciciosTreino.map((exercicio, exercicioIndex) => (
-              <div key={exercicioIndex} className="exercise-card">
-                <h3>{exercicio.nome}</h3>
+            <button
+              type="button"
+              onClick={alternarCronometro}
+              style={{
+                background: cronometroAtivo ? "#f59e0b" : "#16a34a",
+                color: "#fff",
+                marginTop: "15px"
+              }}
+            >
+              {cronometroAtivo ? "⏸ Pausar tempo" : "▶ Iniciar tempo"}
+            </button>
 
-                <table className="exercise-table">
-                  <thead>
-                    <tr>
-                      <th>SÉRIE</th>
-                      <th>KG</th>
-                      <th>REPS</th>
-                      <th></th>
-                    </tr>
-                  </thead>
+            {exerciciosTreino.length === 0 ? (
+              <p className="empty-text">
+                Nenhum exercício adicionado ainda. Clique em “Adicionar
+                exercício” para começar o treino.
+              </p>
+            ) : (
+              exerciciosTreino.map((exercicio, exercicioIndex) => (
+                <div key={exercicioIndex} className="exercise-card">
+                  <h3>{exercicio.nome}</h3>
 
-                  <tbody>
-                    {exercicio.series.map((serie, serieIndex) => (
-                      <tr key={serieIndex}>
-                        <td>{serieIndex + 1}</td>
-
-                        <td>
-                          <input
-                            type="number"
-                            value={serie.carga}
-                            onChange={(e) =>
-                              atualizarSerie(
-                                exercicioIndex,
-                                serieIndex,
-                                "carga",
-                                e.target.value
-                              )
-                            }
-                            className="series-input"
-                            placeholder="0"
-                          />
-                        </td>
-
-                        <td>
-                          <input
-                            type="number"
-                            value={serie.reps}
-                            onChange={(e) =>
-                              atualizarSerie(
-                                exercicioIndex,
-                                serieIndex,
-                                "reps",
-                                e.target.value
-                              )
-                            }
-                            className="series-input"
-                            placeholder="0"
-                          />
-                        </td>
-
-                        <td>
-                          <button
-                            type="button"
-                            className="delete-serie-button"
-                            onClick={() =>
-                              excluirSerie(exercicioIndex, serieIndex)
-                            }
-                          >
-                            X
-                          </button>
-                        </td>
+                  <table className="exercise-table">
+                    <thead>
+                      <tr>
+                        <th>Série</th>
+                        <th>Carga (kg)</th>
+                        <th>Repetições</th>
+                        <th>Ação</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
 
-                <button
-                  type="button"
-                  className="add-series-button"
-                  onClick={() => adicionarSerie(exercicioIndex)}
-                >
-                  + Adicionar Série
-                </button>
+                    <tbody>
+                      {exercicio.series.map((serie, serieIndex) => (
+                        <tr key={serieIndex}>
+                          <td>{serieIndex + 1}</td>
 
-                <button
-                  type="button"
-                  className="delete-exercise-button"
-                  onClick={() => excluirExercicio(exercicioIndex)}
-                >
-                  Excluir Exercício
-                </button>
-              </div>
-            ))}
+                          <td>
+                            <input
+                              id={`carga-${exercicioIndex}-${serieIndex}`}
+                              type="number"
+                              min="1"
+                              value={serie.carga}
+                              onChange={(e) =>
+                                atualizarSerie(
+                                  exercicioIndex,
+                                  serieIndex,
+                                  "carga",
+                                  e.target.value
+                                )
+                              }
+                              className="series-input"
+                              placeholder="Ex: 40"
+                              aria-label={`Carga da série ${serieIndex + 1} do exercício ${exercicio.nome}`}
+                              required
+                            />
+                          </td>
+
+                          <td>
+                            <input
+                              id={`reps-${exercicioIndex}-${serieIndex}`}
+                              type="number"
+                              min="1"
+                              value={serie.reps}
+                              onChange={(e) =>
+                                atualizarSerie(
+                                  exercicioIndex,
+                                  serieIndex,
+                                  "reps",
+                                  e.target.value
+                                )
+                              }
+                              className="series-input"
+                              placeholder="Ex: 10"
+                              aria-label={`Repetições da série ${serieIndex + 1} do exercício ${exercicio.nome}`}
+                              required
+                            />
+                          </td>
+
+                          <td>
+                            <button
+                              type="button"
+                              className="delete-serie-button"
+                              onClick={() =>
+                                excluirSerie(exercicioIndex, serieIndex)
+                              }
+                            >
+                              X
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  <button
+                    type="button"
+                    className="add-series-button"
+                    onClick={() => adicionarSerie(exercicioIndex)}
+                  >
+                    + Adicionar série
+                  </button>
+
+                  <button
+                    type="button"
+                    className="delete-exercise-button"
+                    onClick={() => excluirExercicio(exercicioIndex)}
+                  >
+                    Excluir exercício
+                  </button>
+                </div>
+              ))
+            )}
 
             <button
               className="new-workout-button"
               onClick={() => setMostrarModalExercicio(true)}
               style={{ marginTop: "20px" }}
             >
-              + Adicionar Exercício
+              + Adicionar exercício
             </button>
 
             <div
@@ -450,40 +528,40 @@ function Treinos() {
                 display: "flex",
                 gap: "12px",
                 marginTop: "16px",
+                flexWrap: "wrap",
               }}
             >
               <button
                 type="button"
-                onClick={salvarTreino}
+                onClick={finalizarTreino}
                 style={{
                   background: "#16a34a",
                   color: "#fff",
                 }}
               >
-                Salvar Treino
+                Finalizar treino
               </button>
 
               <button
                 type="button"
-                onClick={() => {
-                  setExerciciosTreino([]);
-                  setTreinoEmAndamento(false);
-                  setCronometroAtivo(false);
-                  setTempoTreino(0);
-                  setDataTreino(new Date().toISOString().split("T")[0]);
-                }}
+                onClick={cancelarTreino}
                 style={{
                   background: "#dc2626",
                   color: "#fff",
                 }}
               >
-                Descartar Treino
+                Descartar treino
               </button>
             </div>
           </section>
         ) : (
-          <section>
-            <h2>Todos os treinos</h2>
+          <section className="chart-card">
+            <h2>Todos os treinos finalizados</h2>
+
+            <p>
+              Os treinos só aparecem aqui depois que forem finalizados pelo
+              usuário.
+            </p>
 
             <ListaTreinos treinos={treinos} excluirTreino={excluirTreino} />
           </section>
@@ -493,22 +571,30 @@ function Treinos() {
       {mostrarModalExercicio && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h2>Adicionar Exercício</h2>
+            <h2>Adicionar exercício</h2>
 
+            <label className="form-label" htmlFor="nomeExercicio">
+              Nome do exercício
+            </label>
             <input
+              id="nomeExercicio"
               type="text"
-              placeholder="Nome do exercício"
+              placeholder="Ex: Supino reto"
               value={nomeExercicio}
               onChange={(e) => setNomeExercicio(e.target.value)}
             />
 
+            <label className="form-label" htmlFor="dataTreino">
+              Data do treino
+            </label>
             <input
-  type="date"
-  value={dataTreino}
-  max={new Date().toISOString().split("T")[0]}
-  onChange={(e) => setDataTreino(e.target.value)}
-  onClick={(e) => e.target.showPicker && e.target.showPicker()}
-/>
+              id="dataTreino"
+              type="date"
+              value={dataTreino}
+              max={new Date().toISOString().split("T")[0]}
+              onChange={(e) => setDataTreino(e.target.value)}
+              onClick={(e) => e.target.showPicker && e.target.showPicker()}
+            />
 
             <div
               style={{
@@ -517,11 +603,14 @@ function Treinos() {
                 marginTop: "15px",
               }}
             >
-              <button onClick={adicionarExercicio}>Adicionar</button>
+              <button onClick={adicionarExercicio}>Adicionar exercício</button>
 
               <button
                 className="secondary-button"
-                onClick={() => setMostrarModalExercicio(false)}
+                onClick={() => {
+                  setNomeExercicio("");
+                  setMostrarModalExercicio(false);
+                }}
               >
                 Cancelar
               </button>
@@ -555,56 +644,62 @@ function Treinos() {
 
 function ListaTreinos({ treinos, excluirTreino }) {
   return (
-    <div className="recent-list">
+    <div className="saved-workouts-list">
       {treinos.length === 0 ? (
-        <p>Nenhum treino ainda.</p>
+        <p>Nenhum treino finalizado ainda.</p>
       ) : (
         treinos.map((t) => (
-          <div className="recent-card" key={t.id}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                gap: "12px",
-              }}
-            >
+          <div className="saved-workout-card" key={t.id}>
+            <div className="saved-workout-top">
               <div>
-                <strong>Treino #{t.id}</strong>
-
-                <span>
-                  {t.total_series} séries •{" "}
-                  {Number(t.volume_total).toLocaleString("pt-BR")} kg
-                </span>
-
-                <span>
-                  {new Date(t.data_treino).toLocaleDateString("pt-BR")}
-                </span>
-
-                <div style={{ marginTop: "12px" }}>
-                  {t.exercicios?.map((exercicio, index) => (
-                    <p key={index} style={{ margin: "6px 0" }}>
-                      {exercicio.total_series} sets {exercicio.nome}
-                    </p>
-                  ))}
-                </div>
+                <h3>Treino #{t.id}</h3>
+                <p>{new Date(t.data_treino).toLocaleDateString("pt-BR")}</p>
               </div>
 
               <button
                 type="button"
+                className="saved-workout-delete"
                 onClick={() => excluirTreino(t.id)}
-                style={{
-                  width: "auto",
-                  background: "#dc2626",
-                  color: "#ffffff",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "6px 10px",
-                  cursor: "pointer",
-                }}
               >
                 Excluir
               </button>
+            </div>
+
+            <div className="saved-workout-badges">
+              <span>{t.exercicios?.length || 0} exercício(s)</span>
+            </div>
+
+            <div className="saved-workout-exercises">
+              {t.exercicios?.map((exercicio, index) => (
+                <div className="saved-exercise-block" key={index}>
+
+                  <div className="saved-exercise-header">
+                    <strong> {exercicio.nome}</strong>
+                  </div>
+
+                  <div className="saved-series-table">
+                    {exercicio.series?.map((serie) => (
+                      <div className="saved-series-row" key={serie.numero}>
+                        <div className="saved-serie-badge">
+                          Série {serie.numero}
+                        </div>
+
+                        <div className="saved-serie-carga">
+                          {Number(serie.carga).toFixed(2)} kg
+                        </div>
+
+                        <div className="saved-serie-x">
+                          ×
+                        </div>
+
+                        <div className="saved-serie-reps">
+                          {serie.repeticoes} reps
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ))

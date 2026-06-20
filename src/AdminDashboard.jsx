@@ -11,24 +11,27 @@ import {
     FiSearch,
     FiArrowLeft,
 } from "react-icons/fi";
- import { mascararEmail } from "./utils/mascararDados";
+import { mascararEmail } from "./utils/mascararDados";
 
 function AdminDashboard() {
     const navigate = useNavigate();
 
+    // Filtros do dashboard
     const [dataInicio, setDataInicio] = useState("");
     const [dataFim, setDataFim] = useState("");
     const [buscaUsuario, setBuscaUsuario] = useState("");
 
+    // Dados exibidos no painel administrativo
+    // OBS: volumeTotal foi removido por solicitação da banca
     const [dados, setDados] = useState({
         totalUsuarios: 0,
         totalTreinos: 0,
         treinosHoje: 0,
-        volumeTotal: 0,
         usuarios: [],
         treinos: [],
     });
 
+    // Verifica autenticação e permissão de administrador
     useEffect(() => {
         const token = localStorage.getItem("token");
         const isAdmin = localStorage.getItem("is_admin");
@@ -47,6 +50,7 @@ function AdminDashboard() {
         carregarDashboard();
     }, []);
 
+    // Busca os dados do dashboard administrativo
     async function carregarDashboard() {
         try {
             const token = localStorage.getItem("token");
@@ -70,12 +74,14 @@ function AdminDashboard() {
         }
     }
 
+    // Limpa o filtro de datas
     function limparFiltro() {
         setDataInicio("");
         setDataFim("");
         setTimeout(() => carregarDashboard(), 0);
     }
 
+    // Exclui usuário comum
     async function excluirUsuario(id, nome) {
         const confirmar = window.confirm(
             `Tem certeza que deseja excluir o usuário "${nome}"? Essa ação apagará todos os dados vinculados.`
@@ -99,6 +105,7 @@ function AdminDashboard() {
         }
     }
 
+    // Filtro de pesquisa dos usuários
     const usuariosFiltrados = dados.usuarios.filter((usuario) => {
         const termo = buscaUsuario.toLowerCase();
 
@@ -123,15 +130,25 @@ function AdminDashboard() {
                         <FiHome /> Dashboard
                     </button>
 
-                    <button onClick={() => document.getElementById("admin-usuarios")?.scrollIntoView({ behavior: "smooth" })}>
+                    <button
+                        onClick={() =>
+                            document
+                                .getElementById("admin-usuarios")
+                                ?.scrollIntoView({ behavior: "smooth" })
+                        }
+                    >
                         <FiUsers /> Usuários
                     </button>
-                    
 
-                    <button onClick={() => document.getElementById("admin-treinos")?.scrollIntoView({ behavior: "smooth" })}>
+                    <button
+                        onClick={() =>
+                            document
+                                .getElementById("admin-treinos")
+                                ?.scrollIntoView({ behavior: "smooth" })
+                        }
+                    >
                         <FiActivity /> Treinos
                     </button>
-                    
 
                     <button onClick={() => navigate("/home")}>
                         <FiArrowLeft /> Voltar ao sistema
@@ -162,6 +179,7 @@ function AdminDashboard() {
                         />
 
                         <button onClick={carregarDashboard}>Filtrar</button>
+
                         <button onClick={limparFiltro} className="clear-filter">
                             Limpar
                         </button>
@@ -173,6 +191,7 @@ function AdminDashboard() {
                         <div className="stat-icon">
                             <FiUsers />
                         </div>
+
                         <div>
                             <h2>{dados.totalUsuarios}</h2>
                             <p>Total de Usuários</p>
@@ -184,10 +203,11 @@ function AdminDashboard() {
                         <div className="stat-icon">
                             <FiActivity />
                         </div>
+
                         <div>
                             <h2>{dados.totalTreinos}</h2>
                             <p>Total de Treinos</p>
-                            <span>Treinos cadastrados</span>
+                            <span>Treinos finalizados</span>
                         </div>
                     </div>
 
@@ -195,25 +215,18 @@ function AdminDashboard() {
                         <div className="stat-icon">
                             <FiCalendar />
                         </div>
+
                         <div>
                             <h2>{dados.treinosHoje}</h2>
                             <p>Treinos Hoje</p>
-                            <span>Registrados hoje</span>
-                        </div>
-                    </div>
-
-                    <div className="admin-stat-card yellow">
-                        <div className="stat-icon">kg</div>
-                        <div>
-                            <h2>{Number(dados.volumeTotal).toLocaleString("pt-BR")}</h2>
-                            <p>Volume Total</p>
-                            <span>Carga movimentada</span>
+                            <span>Finalizados hoje</span>
                         </div>
                     </div>
                 </section>
 
                 <div className="admin-search">
                     <FiSearch />
+
                     <input
                         type="text"
                         placeholder="Pesquisar usuário por nome ou e-mail..."
@@ -221,7 +234,6 @@ function AdminDashboard() {
                         onChange={(e) => setBuscaUsuario(e.target.value)}
                     />
                 </div>
-
                 <section className="admin-card" id="admin-usuarios">
                     <h2>
                         <FiUsers /> Usuários Cadastrados
@@ -246,11 +258,12 @@ function AdminDashboard() {
                                                 <div className="avatar">
                                                     {usuario.nome?.substring(0, 2).toUpperCase()}
                                                 </div>
+
                                                 {usuario.nome}
                                             </div>
                                         </td>
 
-                                        <td>{mascararEmail("admin@email.com")}</td>
+                                        <td>{mascararEmail(usuario.email)}</td>
 
                                         <td>
                                             {Number(usuario.is_admin) === 1 ? (
@@ -262,13 +275,18 @@ function AdminDashboard() {
 
                                         <td>
                                             {Number(usuario.is_admin) === 1 ? (
-                                                <button className="blocked-button" title="Admin protegido">
+                                                <button
+                                                    className="blocked-button"
+                                                    title="Admin protegido"
+                                                >
                                                     <FiSlash />
                                                 </button>
                                             ) : (
                                                 <button
                                                     className="delete-button"
-                                                    onClick={() => excluirUsuario(usuario.id, usuario.nome)}
+                                                    onClick={() =>
+                                                        excluirUsuario(usuario.id, usuario.nome)
+                                                    }
                                                 >
                                                     <FiTrash2 />
                                                 </button>
@@ -292,7 +310,6 @@ function AdminDashboard() {
                                 <tr>
                                     <th>Usuário</th>
                                     <th>Data</th>
-                                    <th>Volume</th>
                                     <th>Séries</th>
                                 </tr>
                             </thead>
@@ -300,14 +317,19 @@ function AdminDashboard() {
                             <tbody>
                                 {dados.treinos.length === 0 ? (
                                     <tr>
-                                        <td colSpan="4">Nenhum treino encontrado no período.</td>
+                                        <td colSpan="3">Nenhum treino encontrado no período.</td>
                                     </tr>
                                 ) : (
                                     dados.treinos.map((treino) => (
                                         <tr key={treino.id}>
                                             <td>{treino.nome}</td>
-                                            <td>{new Date(treino.data_treino).toLocaleDateString("pt-BR")}</td>
-                                            <td>{Number(treino.volume_total).toLocaleString("pt-BR")} kg</td>
+
+                                            <td>
+                                                {new Date(treino.data_treino).toLocaleDateString(
+                                                    "pt-BR"
+                                                )}
+                                            </td>
+
                                             <td>{treino.total_series} séries</td>
                                         </tr>
                                     ))

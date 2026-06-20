@@ -26,12 +26,15 @@ function Login() {
       localStorage.setItem("nome", response.data.usuario.nome);
       localStorage.setItem("is_admin", response.data.usuario.is_admin);
 
-      navigate("/home");
+      if (Number(response.data.usuario.is_admin) === 1) {
+        navigate("/admin");
+      } else {
+        navigate("/home");
+      }
     } catch (error) {
       alert(error.response?.data?.erro || "Erro no login");
     }
   };
-  
 
   return (
     <div className="container">
@@ -40,31 +43,41 @@ function Login() {
 
         <p>Entre na sua conta para acompanhar seus treinos.</p>
 
-        <form onSubmit={handleLogin}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-
-          <div className="password-field">
+        <form onSubmit={handleLogin} className="form">
+          <div className="form-group">
+            <label htmlFor="email">E-mail</label>
             <input
-              type={mostrarSenha ? "text" : "password"}
-              placeholder="Senha"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
+              id="email"
+              type="email"
+              placeholder="Digite seu e-mail"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
+          </div>
 
-            <button
-              type="button"
-              className="eye-button"
-              onClick={() => setMostrarSenha(!mostrarSenha)}
-            >
-              {mostrarSenha ? <FiEye /> : <FiEyeOff />}
-            </button>
+          <div className="form-group">
+            <label htmlFor="senha">Senha</label>
+
+            <div className="password-field">
+              <input
+                id="senha"
+                type={mostrarSenha ? "text" : "password"}
+                placeholder="Digite sua senha"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                required
+              />
+
+              <button
+                type="button"
+                className="eye-button"
+                onClick={() => setMostrarSenha(!mostrarSenha)}
+                aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+              >
+                {mostrarSenha ? <FiEyeOff /> : <FiEye />}
+              </button>
+            </div>
           </div>
 
           <button type="submit">Entrar</button>

@@ -10,21 +10,38 @@ import Stats from "./Stats";
 import Perfil from "./Perfil";
 import AdminDashboard from "./AdminDashboard";
 
-// Componente para proteger rotas
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("token");
 
-  return token ? children : <Navigate to="/login" replace />;
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
+
+function AdminRoute({ children }) {
+  const token = localStorage.getItem("token");
+  const isAdmin = localStorage.getItem("is_admin");
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (Number(isAdmin) !== 1) {
+    return <Navigate to="/home" replace />;
+  }
+
+  return children;
 }
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-
       <Route path="/login" element={<Login />} />
-
       <Route path="/register" element={<Register />} />
+      <Route path="/termos" element={<Terms />} />
 
       <Route
         path="/home"
@@ -65,13 +82,13 @@ function App() {
       <Route
         path="/admin"
         element={
-          <PrivateRoute>
+          <AdminRoute>
             <AdminDashboard />
-          </PrivateRoute>
+          </AdminRoute>
         }
       />
 
-      <Route path="/termos" element={<Terms />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }

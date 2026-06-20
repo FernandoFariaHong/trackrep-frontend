@@ -7,5 +7,8 @@ export const mascararEmail = (email) => {
     return `${nome[0]}***@${dominio}`;
   }
 
-  return `${nome.substring(0, 2)}***@${dominio}`;
+  const primeiro = nome.substring(0, 2);
+  const ultimo = nome.substring(nome.length - 1);
+
+  return `${primeiro}***${ultimo}@${dominio}`;
 };

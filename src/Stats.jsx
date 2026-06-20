@@ -88,12 +88,11 @@ function Stats() {
     }
   };
 
-  const sairDaConta = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("nome");
-    localStorage.removeItem("email");
-    navigate("/");
-  };
+const sairDaConta = () => {
+  localStorage.clear();
+  sessionStorage.clear();
+  navigate("/login");
+};
 
   const hoje = new Date();
 
@@ -106,10 +105,6 @@ function Stats() {
     const dataTreino = new Date(treino.data_treino);
     return dataTreino >= inicioSemana && dataTreino <= hoje;
   }).length;
-
-  const volumeTotal = treinos.reduce((total, treino) => {
-    return total + Number(treino.volume_total || 0);
-  }, 0);
 
   const totalSeries = treinos.reduce((total, treino) => {
     return total + Number(treino.total_series || 0);
@@ -221,8 +216,6 @@ function Stats() {
           <p>Treinos esta semana: {treinosEstaSemana}</p>
 
           <p>Total de séries: {totalSeries}</p>
-
-          <p>Volume total: {volumeTotal.toLocaleString("pt-BR")} kg</p>
 
           <p>
             Tempo estimado: {horas}h {minutos}m
