@@ -285,7 +285,7 @@ const segundos = segundosTotais % 60;
             <div className="home-stat-icon blue">
               <FiClock />
             </div>
-            <p>Tempo estimado</p>
+            <p>Tempo Total</p>
             <h2>
               <h2>
   {horas}h {minutos}m {segundos}s
@@ -417,7 +417,7 @@ const segundos = segundosTotais % 60;
               </div>
 
               <div>
-                <p>Tempo estimado</p>
+                <p>Tempo Total</p>
 
                 <strong>
                   <strong>
