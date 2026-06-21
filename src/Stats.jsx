@@ -88,11 +88,11 @@ function Stats() {
     }
   };
 
-const sairDaConta = () => {
-  localStorage.clear();
-  sessionStorage.clear();
-  navigate("/login");
-};
+  const sairDaConta = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    navigate("/login");
+  };
 
   const hoje = new Date();
 
@@ -110,9 +110,13 @@ const sairDaConta = () => {
     return total + Number(treino.total_series || 0);
   }, 0);
 
-  const minutosTotais = totalSeries * 2;
-  const horas = Math.floor(minutosTotais / 60);
-  const minutos = minutosTotais % 60;
+  const segundosTotais = treinos.reduce((total, treino) => {
+    return total + (Number(treino.duracao_segundos) || 0);
+  }, 0);
+
+  const horas = Math.floor(segundosTotais / 3600);
+  const minutos = Math.floor((segundosTotais % 3600) / 60);
+  const segundos = segundosTotais % 60;
 
   return (
     <div className="dashboard">
@@ -218,7 +222,7 @@ const sairDaConta = () => {
           <p>Total de séries: {totalSeries}</p>
 
           <p>
-            Tempo estimado: {horas}h {minutos}m
+            Tempo total: {horas}h {minutos}m {segundos}s
           </p>
         </section>
 

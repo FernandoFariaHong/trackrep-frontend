@@ -107,9 +107,13 @@ function HomeDashboard() {
     return total + (Number(treino.total_series) || 0);
   }, 0);
 
-  const minutosTotais = treinos.length * 45;
-  const horas = Math.floor(minutosTotais / 60);
-  const minutos = minutosTotais % 60;
+  const segundosTotais = treinos.reduce((total, treino) => {
+  return total + (Number(treino.duracao_segundos) || 0);
+}, 0);
+
+const horas = Math.floor(segundosTotais / 3600);
+const minutos = Math.floor((segundosTotais % 3600) / 60);
+const segundos = segundosTotais % 60;
 
   const datasTreino = [
     ...new Set(
@@ -160,9 +164,7 @@ function HomeDashboard() {
 
           <a
             className={location.pathname === "/treinos" ? "active" : ""}
-            onClick={() =>
-              navigate("/treinos", { state: { abrirModalExercicio: true } })
-            }
+            onClick={() => navigate("/treinos")}
           >
             <FiActivity /> Treinos
           </a>
@@ -285,7 +287,9 @@ function HomeDashboard() {
             </div>
             <p>Tempo estimado</p>
             <h2>
-              {horas}h {minutos}m
+              <h2>
+  {horas}h {minutos}m {segundos}s
+</h2>
             </h2>
           </div>
         </section>
@@ -416,7 +420,9 @@ function HomeDashboard() {
                 <p>Tempo estimado</p>
 
                 <strong>
-                  {horas}h {minutos}m
+                  <strong>
+  {horas}h {minutos}m {segundos}s
+</strong>
                 </strong>
 
                 <span>Baseado nos treinos registrados</span>
