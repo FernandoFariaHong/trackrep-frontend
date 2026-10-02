@@ -2,6 +2,8 @@
 
 Frontend do sistema TrackRep, desenvolvido em React com Vite.
 
+A API que ele consome está em [TrackRep](https://github.com/FernandoFariaHong/TrackRep) (Node.js, Express e MySQL).
+
 ## Descrição
 
 O TrackRep é um sistema web para registro e acompanhamento de treinos de musculação.
@@ -178,7 +180,7 @@ O frontend se comunica com o backend local pela URL:
 http://localhost:3000
 ```
 
-Por isso, antes de usar o sistema, o backend do TrackRep precisa estar rodando.
+Por isso, antes de usar o sistema, o backend do TrackRep precisa estar rodando. O código e as instruções para subir a API estão em [FernandoFariaHong/TrackRep](https://github.com/FernandoFariaHong/TrackRep).
 
 ---
 
